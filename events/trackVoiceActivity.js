@@ -1,6 +1,6 @@
 const VoiceActivity = require('../models/VoiceActivity');
 
-const MIN_TRACK_TIME = 60 * 1000; // 60 seconds
+const MIN_TRACK_TIME = 60; // time in seconds
 
 // Tracks time spent in voice channels
 const UserVoiceState = {};
@@ -13,7 +13,7 @@ const logVoiceChannelActivity = (member, time, channel) => {
       guild: member.guild.id,
       channelName: channel.name,
       channelId: channel.id,
-      time,
+      time: Math.floor(time),
     });
   } else {
     console.log('User was only in channel for ', time);
@@ -38,7 +38,7 @@ const trackVoiceActivity = (oldMember, newMember) => {
       // Going to a different channel
       if (UserVoiceState[newMember.id]) {
         const session = UserVoiceState[newMember.id];
-        const currentTime = Date.now();
+        const currentTime = (Date.now() / 1000);
 
         logVoiceChannelActivity(newMember, (currentTime - session.joinTime), oldUserChannel);
 
@@ -52,7 +52,7 @@ const trackVoiceActivity = (oldMember, newMember) => {
         // Somehow we don't have any stored channels... maybe they were in when the bot turned on? Define it.
         UserVoiceState[newMember.id] = {
           channel: newUserChannel.id,
-          joinTime: Date.now(),
+          joinTime: (Date.now() / 1000),
         };
       }
     
@@ -61,7 +61,7 @@ const trackVoiceActivity = (oldMember, newMember) => {
       if (UserVoiceState[newMember.id]) {
         const session = UserVoiceState[newMember.id];
 
-        logVoiceChannelActivity(newMember, (Date.now() - session.joinTime), oldUserChannel);
+        logVoiceChannelActivity(newMember, ((Date.now() / 1000) - session.joinTime), oldUserChannel);
         
         delete UserVoiceState[newMember.id];
       }
@@ -71,7 +71,7 @@ const trackVoiceActivity = (oldMember, newMember) => {
     if (newUserChannel !== undefined) {
       UserVoiceState[newMember.id] = {
         channel: newUserChannel.id,
-        joinTime: Date.now(),
+        joinTime: (Date.now() / 1000),
       };
     }
   }
