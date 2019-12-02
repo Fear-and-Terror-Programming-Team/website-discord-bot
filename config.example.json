@@ -1,0 +1,8 @@
+{
+    "owners": [
+        "287637021969743872"
+    ],
+    "prefix": ".",
+    "token": "my-awesome-token",
+    "database": "postgres://user:password@ip-address:port/database-name"
+}
