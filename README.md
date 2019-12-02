@@ -1,4 +1,4 @@
-### FaT Activity Monitor
+# FaT Activity Monitor
 
 - Completely tracks a players activity pertaining to the **FaT** Organization
 - Uses RCON to monitor SQUAD server activity
