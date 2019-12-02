@@ -24,7 +24,8 @@ const Log = require('./models/Log');
 
 // Utils
 const createUser = require('./util/createUser');
-const trackVoiceActivity = require('./util/trackVoiceActivity');
+const trackVoiceActivity = require('./events/trackVoiceActivity');
+const guildMemberUpdate = require('./events/guildMemberUpdate');
 
 // Log to console only for now
 const myconsole = new winston.transports.Console();
@@ -103,30 +104,8 @@ client.on('error', winston.error)
 			});
     });
   })
-  .on('guildMemberAdd', (member) => {
-    winston.info(`[DISCORD]: New discord user entered ${member.name} (${member.id})`, err);
-
-    User.create({
-      userId: member.id,
-      username: member.user.username,
-      nickname: member.user.nickname,
-      guild: member.guild.id,
-    }).catch(err => null);
-  })
-  .on('guildMemberUpdate', (oldUser, newUser) => {
-    let changes = {};
-  
-    if (oldUser.nickname !== newUser.nickname) {
-      changes = {
-        ...changes,
-        nickname: newUser.nickname,
-      };
-    }
-    
-    if (Object.keys(changes).length > 0) {
-      User.update(changes, { where: { userId: newUser.user.id, guild: newUser.guild.id } });
-    }
-  });
+  .on('guildMemberAdd', createUser)
+  .on('guildMemberUpdate', guildMemberUpdate);
 
 
 client.registry

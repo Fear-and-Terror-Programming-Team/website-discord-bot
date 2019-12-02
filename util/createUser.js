@@ -2,9 +2,6 @@ const User = require('../models/User');
 const updateUser = require('./updateUser');
 
 const createUser = member => {
-
-  console.log(`Creating New User: ${member.user.username}`);
-
   User.findOrCreate({
     where: {
       userId: member.id,
