@@ -1,11 +1,12 @@
 const Rcon = require('simple-rcon');
 const config = require('../config.json');
 const parseSquadRconPlayers = require('../util/parseSquadRconPlayers');
+const SquadActivity = require('../models/SquadActivity');
 
 const connections = {};
 const servers = {};
 
-const SQUAD_PLAYER_CHECK_INTERVAL = 60 * 1000; // 60 seconds
+const SQUAD_PLAYER_CHECK_INTERVAL = 15 * 1000; // 60 seconds
 
 const startSquadRconMonitors = () => {
 
@@ -23,7 +24,7 @@ const startConnection = server => {
 
   const client = new Rcon({
     ...server,
-    timeout: 2 * 60 * 1000,
+    timeout: 60 * 1000,
   }).connect();
 
   connections[server.id] = {
@@ -88,9 +89,13 @@ const processPlayers = (server, clients) => {
     // We only care about disconnected players if we're actively tracking them
     if (servers[server][player]) {
       // We're currently tracking this player....
-      const timeOnServer = Date.now() - servers[server][player].joinTime;
+      const timeOnServer = Math.floor((Date.now() - servers[server][player].joinTime) / 1000);
 
-      console.log(`Player ${player} spent ${Math.floor(timeOnServer / 1000)} seconds on ${server}`);
+      SquadActivity.create({
+        steamId: player,
+        serverId: server,
+        time: timeOnServer,
+      });
 
       // TODO: Insert a log into the database to track this players playtime.
 

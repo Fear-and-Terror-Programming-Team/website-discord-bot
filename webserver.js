@@ -68,7 +68,6 @@ const startWebServer = () => {
         </body>
       </html>
       `);
-      // return res.send('Hooray! We\'re done linking your steam account. Thanks!');
     }
 
     const id = req.query.id;

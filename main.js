@@ -9,8 +9,6 @@ const CommandoClient = require('./structures/CommandoClient');
 // Config
 const config = require('./config.json');
 
-// https://discordapp.com/api/oauth2/authorize?client_id=651122365006086144&permissions=8&scope=bot
-
 const client = new CommandoClient({
 	owner: config.owners,
 	commandPrefix: config.prefix,
