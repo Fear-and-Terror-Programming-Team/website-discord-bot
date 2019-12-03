@@ -4,5 +4,13 @@
     ],
     "prefix": ".",
     "token": "my-awesome-token",
-    "database": "postgres://user:password@ip-address:port/database-name"
+    "database": "postgres://user:password@ip-address:port/database-name",
+    "squad": [
+        {
+            "id": "server-1",
+            "host": "0.0.0.0",
+            "port": "7140",
+            "password": "my-awesome-password"
+        }
+    ]
 }

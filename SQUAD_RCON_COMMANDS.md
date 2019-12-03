@@ -1,4 +1,4 @@
-
+# Squad Rcon Commands
 
 - ListCommands <ShowDetails [0|1]>
 - ShowCommandInfo <CommandName>
