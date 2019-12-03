@@ -27,6 +27,9 @@ const createUser = require('./util/createUser');
 const trackVoiceActivity = require('./events/trackVoiceActivity');
 const guildMemberUpdate = require('./events/guildMemberUpdate');
 
+const startSquadRconMonitors = require('./structures/RconClient');
+startSquadRconMonitors();
+
 // Log to console only for now
 const myconsole = new winston.transports.Console();
 winston.add(myconsole);

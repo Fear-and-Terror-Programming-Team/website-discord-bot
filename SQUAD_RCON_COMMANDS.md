@@ -1,0 +1,49 @@
+
+
+- ListCommands <ShowDetails [0|1]>
+- ShowCommandInfo <CommandName>
+- ListPlayers
+- AdminListDisconnectedPlayers
+- ListSquads
+- ListMaps
+- ListPermittedCommands <ShowDetails [0|1]>
+- AdminKick "<NameOrSteamId>" <KickReason>
+- AdminKickById <PlayerId> <KickReason>
+- AdminBan "<NameOrSteamId>" "<BanLength>" <BanReason>
+- AdminBanById <PlayerId> "<BanLength>" <BanReason>
+- AdminWarn "<NameOrSteamId>" <WarnReason>
+- AdminWarnById <PlayerId> <WarnReason>
+- AdminForceTeamChange <NameOrSteamId>
+- AdminForceTeamChangeById <PlayerId>
+- AdminBroadcast <Message>
+- ChatToAdmin <Message>
+- AdminRestartMatch
+- AdminEndMatch
+- AdminPauseMatch
+- AdminUnpauseMatch
+- AdminKillServer <Force [0|1]>
+- AdminChangeMap <MapName>
+- AdminSetNextMap <MapName>
+- AdminSetRaasSeed <Seed>
+- AdminSetMaxNumPlayers <NumPlayers>
+- AdminSetNumReservedSlots <NumReserved>
+- AdminSetServerPassword <Password>
+- AdminSlomo <TimeDilation>
+- AdminAlwaysValidPlacement <AlwaysValid [0|1]>
+- AdminAllKitsAvailable <Valid [0|1]>
+- AdminDisableVehicleClaiming <Valid [0|1]>
+- AdminForceNetUpdateOnClientSaturation <Enabled [0|1]>
+- AdminAddCameraman <NameOrId>
+- AdminCreateVehicle <ClassName>
+- AdminSpawnActor <Index>
+- AdminDemoPlay <FileName>
+- AdminDemoRec <FileName>
+- AdminDemoStop
+- AdminProfileServer <SecondsToProfileFor> <bUseRaw [0|1]>
+- AdminRemovePlayerFromSquadById <PlayerId>
+- AdminRemovePlayerFromSquad <PlayerName>
+- AdminDemoteCommander <PlayerName>
+- AdminDemoteCommanderById <PlayerId>
+- AdminDisbandSquad <TeamNumber = [1|2]> <SquadIndex>
+- ShowNextMap
+- SLInviteMember <Name>
