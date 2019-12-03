@@ -4,6 +4,7 @@
     ],
     "prefix": ".",
     "token": "my-awesome-token",
+    "steamApiKey": "my-steam-api-key",
     "database": "postgres://user:password@ip-address:port/database-name",
     "squad": [
         {

@@ -27,6 +27,9 @@ const createUser = require('./util/createUser');
 const trackVoiceActivity = require('./events/trackVoiceActivity');
 const guildMemberUpdate = require('./events/guildMemberUpdate');
 
+const startWebServer = require('./webserver');
+startWebServer();
+
 const startSquadRconMonitors = require('./structures/RconClient');
 startSquadRconMonitors();
 
@@ -114,6 +117,7 @@ client.on('error', winston.error)
 client.registry
 	.registerGroups([
 		['info', 'Info'],
+		['user', 'User'],
 		['games', 'Games'],
 		['item', 'Item'],
 		['weather', 'Weather'],
