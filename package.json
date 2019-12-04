@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/bryandesigning/ActivityTracker#readme",
   "dependencies": {
+    "@pm2/io": "^4.3.3",
     "common-tags": "^1.8.0",
     "discord.js": "^11.5.1",
     "discord.js-commando": "^0.10.0",
@@ -26,6 +27,7 @@
     "passport-steam": "^1.0.12",
     "pg": "^7.14.0",
     "sequelize": "^5.21.2",
+    "sequelize-pool": "^2.3.0",
     "simple-rcon": "^0.3.1",
     "winston": "^3.2.1"
   }

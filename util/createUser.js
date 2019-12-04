@@ -1,7 +1,15 @@
+const io = require('@pm2/io');
 const User = require('../models/User');
 const updateUser = require('./updateUser');
 
+const currentCreateUser = io.counter({
+  name: 'Create Users',
+  id: 'app/realtime/createUsers'
+});
+
 const createUser = member => {
+  currentCreateUser.inc();
+
   User.findOrCreate({
     where: {
       userId: member.id,
@@ -14,6 +22,7 @@ const createUser = member => {
     }
   })
     .then(([ result, created ]) => {
+      currentCreateUser.dec();
       if (!created) {
         let changes = {};
 
@@ -38,7 +47,15 @@ const createUser = member => {
         }
       }
     })
-    .catch(err => console.error(err));
+    .catch(err => {
+      io.notifyError(new Error('[DB] Create User'), {
+        custom: {
+          error: err,
+          discordId: member.id,
+        }
+      });
+      currentCreateUser.dec();
+    });
 }
 
 module.exports = createUser;

@@ -1,12 +1,18 @@
 const Sequelize = require('sequelize');
 const winston = require('winston');
+// const Pool = require('sequelize-pool').Pool;
 
 const config = require('../config.json');
 const database = new Sequelize(config.database, {
 	logging: false,
   dialectOptions: {
     ssl: true
-	}
+	},
+	pool: {
+    max: 40,
+    min: 0,
+    idle: 10000
+  }
 });
 
 class Database {

@@ -44,12 +44,20 @@ client.on('error', winston.error)
 		
 		setTimeout(() => {
 			// Go through all our guilds, create new members for people we've missed while offline...
+			console.log('Starting to sync all users...');
+
 			client.guilds.forEach(guild => {
+				let userCount = 0;
+				
 				guild.members.forEach(member => {
 					createUser(member);
+					userCount += 1;
 				});
+
+				console.log(`Tried to sync ${userCount} members - Guild Members: ${guild.memberCount}`);
 			});
-		}, 2000);
+			
+		}, 10000);
   })
 	.on('ready', () => {
 		winston.info(oneLine`
@@ -128,31 +136,3 @@ client.registry
 	.registerCommandsIn(path.join(__dirname, 'commands'));
 
 client.login(config.token);
-
-// setTimeout(() => {
-// 	// steamServerStatus.getServerStatus(
-// 	// 		'167.88.11.228', 27165, function(serverInfo) {
-// 	// 				if (serverInfo.error) {
-// 	// 						console.log(serverInfo.error);
-// 	// 				} else {
-// 	// 					console.log(serverInfo);
-// 	// 						console.log("game: " + serverInfo.gameName);
-// 	// 						console.log("server name: " + serverInfo.serverName);
-// 	// 						console.log("players: " + serverInfo.numberOfPlayers + "/" + serverInfo.maxNumberOfPlayers)
-// 	// 				}
-// 	// });
-// 	var sq = new SourceQuery(1000); // 1000ms timeout
-// 	sq.open('167.88.11.228', 27165);
-	
-// 	sq.getInfo(function(err, info){
-// 		console.log('Server Info:', info);
-// 	});
-
-// 	sq.getPlayers(function(err, players){
-// 		console.log('Online Players:', players);
-// 	});
-
-// 	sq.getRules(function(err, rules){
-// 		console.log('Server Rules:', rules);
-// 	});
-// }, 5000);

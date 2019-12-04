@@ -1,9 +1,15 @@
+const io = require('@pm2/io');
 const VoiceActivity = require('../models/VoiceActivity');
 
 const MIN_TRACK_TIME = 60; // time in seconds
 
 // Tracks time spent in voice channels
 const UserVoiceState = {};
+
+const trackedVoiceUsers = io.metric({
+  name: 'Tracked Voice Users',
+  id: 'app/realtime/voiceUsers',
+});
 
 const logVoiceChannelActivity = (member, time, channel) => {
   // Don't track anything under set time
@@ -16,7 +22,7 @@ const logVoiceChannelActivity = (member, time, channel) => {
       time: Math.floor(time),
     });
   } else {
-    console.log('User was only in channel for ', time);
+    console.log(`[VA]: ${member.user.username} was only in "${channel.name}" for ${time}`);
   }
 }
 
@@ -43,7 +49,7 @@ const trackVoiceActivity = (oldMember, newMember) => {
         logVoiceChannelActivity(newMember, (currentTime - session.joinTime), oldUserChannel);
 
         // We should have this already, update their channel id...
-        UserVoiceState[newMember.id].channel = {
+        UserVoiceState[newMember.id] = {
           channel: newUserChannel.id,
           joinTime: currentTime,
         };
@@ -64,6 +70,8 @@ const trackVoiceActivity = (oldMember, newMember) => {
         logVoiceChannelActivity(newMember, ((Date.now() / 1000) - session.joinTime), oldUserChannel);
         
         delete UserVoiceState[newMember.id];
+
+        trackedVoiceUsers.set(Object.values(UserVoiceState).length);
       }
     }
   } else {
@@ -73,20 +81,9 @@ const trackVoiceActivity = (oldMember, newMember) => {
         channel: newUserChannel.id,
         joinTime: (Date.now() / 1000),
       };
+
+      trackedVoiceUsers.set(Object.values(UserVoiceState).length);
     }
-  }
-
-  // console.log(oldUserChannel ? oldUserChannel.name : null, newUserChannel ? newUserChannel.name : null);
-  // console.log(newUserChannel);
-  
-  if(oldUserChannel === undefined && newUserChannel !== undefined) {
-
-     // User Joins a voice channel
-
-  } else if(newUserChannel === undefined){
-
-    // User leaves a voice channel
-
   }
 }
 
