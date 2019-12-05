@@ -1,3 +1,4 @@
+const io = require('@pm2/io');
 const MessageActivity = require('../models/MessageActivity');
 
 const trackMessageActivity = message => {

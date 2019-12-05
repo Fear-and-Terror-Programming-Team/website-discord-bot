@@ -21,8 +21,6 @@ const logVoiceChannelActivity = (member, time, channel) => {
       channelId: channel.id,
       time: Math.floor(time),
     });
-  } else {
-    console.log(`[VA]: ${member.user.username} was only in "${channel.name}" for ${time}`);
   }
 }
 
