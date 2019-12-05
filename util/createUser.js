@@ -1,6 +1,6 @@
 const io = require('@pm2/io');
 const User = require('../models/User');
-const updateUser = require('./updateUser');
+const compareUserForUpdate = require('./compareUser');
 
 const currentCreateUser = io.counter({
   name: 'Create Users',
@@ -9,61 +9,55 @@ const currentCreateUser = io.counter({
 
 const createUser = member => {
   currentCreateUser.inc();
+  
+  // Build the roles array here
+  let roles = [];
+  member.roles.forEach(role => {
+    roles.push(role.id);
+  });
+  roles = JSON.stringify(roles);
 
-  User.findOrCreate({
+  // Check if we know this user
+  User.findAll({
     where: {
       userId: member.id,
-    },
-    defaults: { // set the default properties if it doesn't exist
-      userId: member.id,
-      username: member.user.username,
-      nickname: member.nickname,
       guild: member.guild.id,
-    }
-  })
-    .then(([ result, created ]) => {
-      currentCreateUser.dec();
-      if (!created) {
-        let changes = {};
-        let roles = [];
-        member.roles.forEach(role => {
-          roles.push(role.id);
+    },
+  }).then(res => {
+    if (res.length < 1) {
+      
+      User.create({
+        userId: member.id,
+        username: member.user.username,
+        nickname: member.nickname,
+        guild: member.guild.id,
+        roles,
+      }).then(res => {
+        currentCreateUser.dec();
+      }).catch(err => {
+        io.notifyError(new Error('[DB] Create User'), {
+          custom: {
+            error: err,
+            discordId: member.id,
+          }
         });
+        currentCreateUser.dec();
+      });
 
-        roles = JSON.stringify(roles);
-
-        // Check for username changes
-        if (result.username !== member.user.username) {
-          changes = {
-            ...changes,
-            username: member.user.username,
-          };
-        }
-
-        if (result.roles !== roles) {
-          changes = {
-            ...changes,
-            roles,
-          };
-        }
-
-        // Check for nickname changes
-        if (result.nickname !== member.nickname) {
-          changes = {
-            ...changes,
-            nickname: member.nickname,
-          };
-        }
-
-        if (Object.keys(changes).length > 0) {
-          console.log(`Updating user: ${member.user.username} Changes: ${Object.keys(changes)}`)
-          updateUser(member, changes);
-        }
+    } else {
+      const result = res[0].dataValues;
+      compareUserForUpdate(result, member, true);
+      currentCreateUser.dec();
+    }
+  }).catch(err => {
+    io.notifyError(new Error('[DB] Create User'), {
+      custom: {
+        error: err,
+        discordId: member.id,
       }
-    })
-    .catch(err => {
-      console.log(err);
     });
+    currentCreateUser.dec();
+  });
 }
 
 module.exports = createUser;

@@ -23,7 +23,7 @@ const Log = require('./models/Log');
 // Utils
 const createUser = require('./util/createUser');
 const trackVoiceActivity = require('./events/trackVoiceActivity');
-const guildMemberUpdate = require('./events/guildMemberUpdate');
+const compareUserForUpdate = require('./util/compareUser');
 
 const startWebServer = require('./webserver');
 startWebServer();
@@ -117,7 +117,7 @@ client.on('error', winston.error)
     });
   })
   .on('guildMemberAdd', createUser)
-	.on('guildMemberUpdate', guildMemberUpdate);
+	.on('guildMemberUpdate', compareUserForUpdate);
 
 // client.on('raw', event => {
 // 	if (event.d) {

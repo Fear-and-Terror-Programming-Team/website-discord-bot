@@ -16,10 +16,6 @@ const User = Database.db.define('user', {
 }, {
 	indexes: [
 		{ fields: ['userId','guild'] },
-		{
-			fields: ['userId', 'username'],
-			unique: true
-    },
 	],
 });
 
