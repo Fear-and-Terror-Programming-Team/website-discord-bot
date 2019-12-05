@@ -5,33 +5,32 @@ const winston = require('winston');
 const { oneLine } = require('common-tags');
 const SequelizeProvider = require('./providers/Sequelize');
 const CommandoClient = require('./structures/CommandoClient');
+const io = require('@pm2/io');
+const Log = require('./models/Log');
+const Roles = require('./models/Roles');
+const createUser = require('./util/createUser');
+const createRole = require('./util/createRole');
+const trackVoiceActivity = require('./events/trackVoiceActivity');
+const trackMessageActivity = require('./events/trackMessageActivity');
+const compareUserForUpdate = require('./util/compareUser');
+const startWebServer = require('./webserver');
+const startSquadRconMonitors = require('./structures/RconClient');
+const compareRoleForUpdate = require('./util/compareRole');
 
 // Config
 const config = require('./config.json');
 
+// Side Processes
+startWebServer();
+startSquadRconMonitors();
+
+// Discord Bot
 const client = new CommandoClient({
 	owner: config.owners,
 	commandPrefix: config.prefix,
 	unknownCommandResponse: false,
 	disableEveryone: true,
 });
-
-// Database Tables
-// const User = require('./models/User');
-const Log = require('./models/Log');
-
-// Utils
-const createUser = require('./util/createUser');
-const trackVoiceActivity = require('./events/trackVoiceActivity');
-const trackMessageActivity = require('./events/trackMessageActivity');
-const compareUserForUpdate = require('./util/compareUser');
-
-
-const startWebServer = require('./webserver');
-startWebServer();
-
-const startSquadRconMonitors = require('./structures/RconClient');
-startSquadRconMonitors();
 
 // Log to console only for now
 const myconsole = new winston.transports.Console();
@@ -58,6 +57,14 @@ client.on('error', winston.error)
 
 				console.log(`Tried to sync ${userCount} members - Guild Members: ${guild.memberCount}`);
 			});
+
+			setTimeout(() => {
+				client.guilds.forEach(guild => {
+					guild.roles.forEach(role => {
+						createRole(role);
+					});
+				});
+			}, 5000);
 			
 		}, 10000);
   })
@@ -123,16 +130,41 @@ client.on('error', winston.error)
 
 client.on('message', trackMessageActivity);
 
+client.on('roleCreate', role => {
+	Roles.create({
+		guild: role.guild.id,
+		roleId: role.id,
+		roleName: role.name,
+	}).catch(err => {
+		io.notifyError(new Error('[DB] Create Role'), {
+			custom: {
+				error: err,
+				roleId: role.id,
+			}
+		});
+	});
+});
+client.on('roleUpdate', compareRoleForUpdate);
+client.on('roleDelete', role => {
+	Roles.destroy({
+		where: {
+			roleId: role.id,
+			guild: role.guild.id,
+		},
+	}).catch(err => {
+		io.notifyError(new Error('[DB] Delete Role'), {
+			custom: {
+				error: err,
+				roleId: role.id,
+			}
+		});
+	});
+});
+
 client.registry
 	.registerGroups([
 		['info', 'Info'],
 		['user', 'User'],
-		['games', 'Games'],
-		['item', 'Item'],
-		['weather', 'Weather'],
-		['music', 'Music'],
-		['tags', 'Tags'],
-		['docs', 'Documentation']
 	])
 	.registerDefaults()
 	.registerTypesIn(path.join(__dirname, 'types'))
