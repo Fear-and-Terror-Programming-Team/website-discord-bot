@@ -13,17 +13,19 @@ const client = new CommandoClient({
 	owner: config.owners,
 	commandPrefix: config.prefix,
 	unknownCommandResponse: false,
-	disableEveryone: true
+	disableEveryone: true,
 });
 
 // Database Tables
-const User = require('./models/User');
+// const User = require('./models/User');
 const Log = require('./models/Log');
 
 // Utils
 const createUser = require('./util/createUser');
 const trackVoiceActivity = require('./events/trackVoiceActivity');
+const trackMessageActivity = require('./events/trackMessageActivity');
 const compareUserForUpdate = require('./util/compareUser');
+
 
 const startWebServer = require('./webserver');
 startWebServer();
@@ -119,22 +121,7 @@ client.on('error', winston.error)
   .on('guildMemberAdd', createUser)
 	.on('guildMemberUpdate', compareUserForUpdate);
 
-// client.on('raw', event => {
-// 	if (event.d) {
-// 		if (event.d.guild_id !== '398543362476605441') {
-// 			console.log(event);
-// 		}
-// 	}
-// });
-
-
-// client.on('guildMemberRemove', event => {
-// 	console.log('guildMemberRemove: ', event);
-// });
-
-// client.on('guildBanAdd', (guild, user) => {
-// 	console.log('guildBanAdd: ', guild, user);
-// });
+client.on('message', trackMessageActivity);
 
 client.registry
 	.registerGroups([
