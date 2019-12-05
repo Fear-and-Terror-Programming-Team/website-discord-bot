@@ -117,8 +117,24 @@ client.on('error', winston.error)
     });
   })
   .on('guildMemberAdd', createUser)
-  .on('guildMemberUpdate', guildMemberUpdate);
+	.on('guildMemberUpdate', guildMemberUpdate);
 
+// client.on('raw', event => {
+// 	if (event.d) {
+// 		if (event.d.guild_id !== '398543362476605441') {
+// 			console.log(event);
+// 		}
+// 	}
+// });
+
+
+// client.on('guildMemberRemove', event => {
+// 	console.log('guildMemberRemove: ', event);
+// });
+
+// client.on('guildBanAdd', (guild, user) => {
+// 	console.log('guildBanAdd: ', guild, user);
+// });
 
 client.registry
 	.registerGroups([
@@ -136,3 +152,8 @@ client.registry
 	.registerCommandsIn(path.join(__dirname, 'commands'));
 
 client.login(config.token);
+
+
+// GUILD_MEMBER_ADD
+// GUILD_MEMBER_REMOVE
+// GUILD_BAN_ADD

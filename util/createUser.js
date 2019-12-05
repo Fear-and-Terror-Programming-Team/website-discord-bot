@@ -25,12 +25,25 @@ const createUser = member => {
       currentCreateUser.dec();
       if (!created) {
         let changes = {};
+        let roles = [];
+        member.roles.forEach(role => {
+          roles.push(role.id);
+        });
+
+        roles = JSON.stringify(roles);
 
         // Check for username changes
         if (result.username !== member.user.username) {
           changes = {
             ...changes,
             username: member.user.username,
+          };
+        }
+
+        if (result.roles !== roles) {
+          changes = {
+            ...changes,
+            roles,
           };
         }
 
@@ -43,18 +56,13 @@ const createUser = member => {
         }
 
         if (Object.keys(changes).length > 0) {
+          console.log(`Updating user: ${member.user.username} Changes: ${Object.keys(changes)}`)
           updateUser(member, changes);
         }
       }
     })
     .catch(err => {
-      io.notifyError(new Error('[DB] Create User'), {
-        custom: {
-          error: err,
-          discordId: member.id,
-        }
-      });
-      currentCreateUser.dec();
+      console.log(err);
     });
 }
 
