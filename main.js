@@ -16,6 +16,7 @@ const compareUserForUpdate = require('./util/compareUser');
 const startWebServer = require('./webserver');
 const startSquadRconMonitors = require('./structures/RconClient');
 const compareRoleForUpdate = require('./util/compareRole');
+const updateChannel = require('./util/updateChannel');
 
 // Config
 const config = require('./config.json');
@@ -62,6 +63,10 @@ client.on('error', winston.error)
 				client.guilds.forEach(guild => {
 					guild.roles.forEach(role => {
 						createRole(role);
+					});
+
+					guild.channels.forEach(channel => {
+						updateChannel(channel);
 					});
 				});
 			}, 5000);
@@ -160,6 +165,8 @@ client.on('roleDelete', role => {
 		});
 	});
 });
+client.on('channelCreate', updateChannel);
+client.on('channelUpdate', (old, newChannel) => updateChannel(newChannel));
 
 client.registry
 	.registerGroups([
