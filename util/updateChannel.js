@@ -1,7 +1,7 @@
 const io = require('@pm2/io');
 const Channels = require('../models/Channels');
 
-const updateChannel = channel => {
+const updateChannel = (channel, access = true) => {
   Channels.findAll({
     where: {
       channelId: channel.id,
@@ -13,6 +13,8 @@ const updateChannel = channel => {
         channelId: channel.id,
         name: channel.name,
         guild: channel.guild.id,
+        type: channel.type,
+        access,
       }).catch(err => {
         io.notifyError(new Error('[DB] Create Channel'), {
           custom: {
@@ -24,9 +26,11 @@ const updateChannel = channel => {
       return;
     }
     
-    if (result[0].name !== channel.name) {
+    if (result[0].name !== channel.name || result[0].type !== channel.type) {
       Channels.update({
         name: channel.name,
+        type: channel.type,
+        access,
       }, {
         where: {
           channelId: channel.id,

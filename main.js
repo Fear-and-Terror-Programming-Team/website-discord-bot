@@ -66,7 +66,13 @@ client.on('error', winston.error)
 					});
 
 					guild.channels.forEach(channel => {
-						updateChannel(channel);
+						if (channel.type == 'text') {
+							channel.fetchMessages({ limit: 2 })
+								.then(() => updateChannel(channel, true))
+								.catch(() => updateChannel(channel, false));
+						} else {
+							updateChannel(channel);
+						}
 					});
 				});
 			}, 5000);
@@ -165,8 +171,24 @@ client.on('roleDelete', role => {
 		});
 	});
 });
-client.on('channelCreate', updateChannel);
-client.on('channelUpdate', (old, newChannel) => updateChannel(newChannel));
+client.on('channelCreate', channel => {	
+	if (channel.type == 'text') {
+		channel.fetchMessages({ limit: 2 })
+			.then(() => updateChannel(channel, true))
+			.catch(() => updateChannel(channel, false));
+	} else {
+		updateChannel(channel);
+	}
+});
+client.on('channelUpdate', (old, channel) => {
+	if (channel.type == 'text') {
+		channel.fetchMessages({ limit: 2 })
+			.then(() => updateChannel(channel, true))
+			.catch(() => updateChannel(channel, false));
+	} else {
+		updateChannel(channel);
+	}
+});
 
 client.registry
 	.registerGroups([
