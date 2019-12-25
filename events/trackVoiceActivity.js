@@ -1,7 +1,8 @@
 const io = require('@pm2/io');
+const moment = require('moment');
 const VoiceActivity = require('../models/VoiceActivity');
 
-const MIN_TRACK_TIME = 60; // time in seconds
+const MIN_TRACK_TIME = 15; // time in seconds
 
 // Tracks time spent in voice channels
 const UserVoiceState = {};
@@ -20,6 +21,8 @@ const logVoiceChannelActivity = (member, time, channel) => {
       channelName: channel.name,
       channelId: channel.id,
       time: Math.floor(time),
+      joinTime: moment().subtract(Math.floor(time), 'seconds'),
+      leaveTime: moment(),
     });
   }
 }

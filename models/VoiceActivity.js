@@ -7,7 +7,9 @@ const VoiceActivity = Database.db.define('voiceActivity', {
   guild: Sequelize.STRING,
   channelName: Sequelize.STRING,
   channelId: Sequelize.STRING,
-	time: Sequelize.BIGINT,
+  time: Sequelize.BIGINT,
+  joinTime: Sequelize.DATE,
+  leaveTime: Sequelize.DATE,
 }, {
   indexes: [
     { fields: ['userId'] },
