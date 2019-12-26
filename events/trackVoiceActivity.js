@@ -21,8 +21,8 @@ const logVoiceChannelActivity = (member, time, channel) => {
       channelName: channel.name,
       channelId: channel.id,
       time: Math.floor(time),
-      joinTime: moment().subtract(Math.floor(time), 'seconds'),
-      leaveTime: moment(),
+      jointime: moment().utc().subtract(Math.floor(time), 'seconds').toDate(),
+      leavetime: moment().utc().toDate(),
     });
   }
 }
