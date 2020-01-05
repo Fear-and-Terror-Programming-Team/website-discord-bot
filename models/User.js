@@ -13,6 +13,7 @@ const User = Database.db.define('user', {
 		values: [ '','pending','recruit','member','leader','moderator','administrator','asst-manager','manager','director' ],
 	},
 	roles: Sequelize.TEXT,
+	avatar: Sequelize.STRING,
 }, {
 	indexes: [
 		{ fields: ['userId','guild'] },

@@ -17,6 +17,7 @@ const startWebServer = require('./webserver');
 const startSquadRconMonitors = require('./structures/RconClient');
 const compareRoleForUpdate = require('./util/compareRole');
 const updateChannel = require('./util/updateChannel');
+const moment = require('moment');
 
 // Config
 const config = require('./config.json');
@@ -200,6 +201,33 @@ client.registry
 	.registerCommandsIn(path.join(__dirname, 'commands'));
 
 client.login(config.token);
+
+
+// const VoiceActivity = require('./models/VoiceActivity');
+
+
+// VoiceActivity
+// .findAll()
+// .then(results => {
+// 		let rowCount = 0;
+// 		results.forEach(voice => {
+
+// 			rowCount++;
+// 			const createdAt = voice.get('createdAt');
+// 			const time = parseInt(voice.get('time'), 0);
+
+// 			voice.update({
+// 				jointime: moment(createdAt).utc().subtract(Math.floor(time), 'seconds').toDate(),
+// 				leavetime: moment(createdAt).utc().toDate(),
+// 			});
+
+// 		});
+
+// 		console.log(`Finished ${rowCount} rows`);
+// 	})
+// 	.catch(err => {
+// 		console.log(err);
+// 	})
 
 
 // GUILD_MEMBER_ADD

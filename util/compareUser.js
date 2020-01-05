@@ -22,11 +22,20 @@ const compareUserForUpdate = (oldMember, newMember, fromDB = false) => {
   newRoles = JSON.stringify(newRoles);
   
   // Check for username changes
-  const oldUsername = fromDB ? oldMember.username : oldMember.user.username;
-  if (oldUsername !== newMember.user.username) {
+  const oldUsername = fromDB ? oldMember.username : `${oldMember.user.username}#${oldMember.user.discriminator}`;
+  if (oldUsername !== `${newMember.user.username}#${newMember.user.discriminator}`) {
     changes = {
       ...changes,
-      username: newMember.user.username,
+      username: `${newMember.user.username}#${newMember.user.discriminator}`,
+    };
+  }
+  
+  // Check for avatar changes
+  const oldAvatar = fromDB ? oldMember.avatar : oldMember.user.avatar;
+  if (oldAvatar !== newMember.user.avatar) {
+    changes = {
+      ...changes,
+      avatar: newMember.user.avatar,
     };
   }
 
