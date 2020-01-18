@@ -214,7 +214,6 @@ const startWebServer = client => {
       count++;
     });
 
-
     res.status(200).send({
       completed: true,
       users: count,
