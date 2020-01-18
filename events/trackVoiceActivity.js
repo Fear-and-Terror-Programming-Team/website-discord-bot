@@ -5,19 +5,19 @@ const VoiceActivity = require('../models/VoiceActivity');
 const MIN_TRACK_TIME = 15; // time in seconds
 
 // Tracks time spent in voice channels
-const UserVoiceState = {};
+let UserVoiceState = {};
 
 const trackedVoiceUsers = io.metric({
   name: 'Tracked Voice Users',
   id: 'app/realtime/voiceUsers',
 });
 
-const logVoiceChannelActivity = (member, time, channel) => {
+const logVoiceChannelActivity = (userId, time, channel, guild = '398543362476605441') => {
   // Don't track anything under set time
   if (time >= MIN_TRACK_TIME) {
     VoiceActivity.create({
-      userId: member.id,
-      guild: member.guild.id,
+      userId,
+      guild,
       channelName: channel.name,
       channelId: channel.id,
       time: Math.floor(time),
@@ -47,7 +47,7 @@ const trackVoiceActivity = (oldMember, newMember) => {
         const session = UserVoiceState[newMember.id];
         const currentTime = (Date.now() / 1000);
 
-        logVoiceChannelActivity(newMember, (currentTime - session.joinTime), oldUserChannel);
+        logVoiceChannelActivity(newMember.id, (currentTime - session.joinTime), oldUserChannel, newMember.guild.id);
 
         // We should have this already, update their channel id...
         UserVoiceState[newMember.id] = {
@@ -68,8 +68,8 @@ const trackVoiceActivity = (oldMember, newMember) => {
       if (UserVoiceState[newMember.id]) {
         const session = UserVoiceState[newMember.id];
 
-        logVoiceChannelActivity(newMember, ((Date.now() / 1000) - session.joinTime), oldUserChannel);
-        
+        logVoiceChannelActivity(newMember.id, ((Date.now() / 1000) - session.joinTime), oldUserChannel, newMember.guild.id);
+
         delete UserVoiceState[newMember.id];
 
         trackedVoiceUsers.set(Object.values(UserVoiceState).length);
@@ -88,4 +88,4 @@ const trackVoiceActivity = (oldMember, newMember) => {
   }
 }
 
-module.exports = trackVoiceActivity;
+module.exports = { trackVoiceActivity, UserVoiceState, logVoiceChannelActivity };

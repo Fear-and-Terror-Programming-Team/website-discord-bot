@@ -1,6 +1,7 @@
 const express = require('express');
 const server = express();
 const port = 4500;
+const { UserVoiceState, logVoiceChannelActivity } = require('./events/trackVoiceActivity');
 
 const User = require('./models/User');
 
@@ -199,6 +200,23 @@ const startWebServer = client => {
 
     res.status(500).send({
       complete: false,
+    });
+  });
+
+  server.get('/update', (req, res) => {
+    let count = 0;
+
+    Object.keys(UserVoiceState).forEach(key => {
+      const session = UserVoiceState[key];
+      const currentTime = (Date.now() / 1000);
+      logVoiceChannelActivity(key, (currentTime - session.joinTime), session.channel);
+      delete UserVoiceState[key];
+      count++;
+    });
+
+    res.status(200).send({
+      completed: true,
+      users: count,
     });
   });
   
