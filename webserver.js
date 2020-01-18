@@ -31,7 +31,7 @@ const startWebServer = client => {
     const channel = guild.channels.find(c => c.id === '664290402144092161'); // application-voting-test
     
     if (channel) {
-      channel.send(`<@491656150073475082> \n A new application has been posted by <@${uid}>. Please place your votes!\n http://personnel.fearandterror.com/applications/${id}`);
+      channel.send(`<@&491656150073475082> \n A new application has been posted by <@${uid}>. Please place your votes!\n http://personnel.fearandterror.com/applications/${id}`);
 
       return res.status(200).send({
         complete: true,
