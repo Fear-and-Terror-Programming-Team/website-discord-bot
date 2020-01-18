@@ -128,6 +128,41 @@ const startWebServer = client => {
     });
   });
 
+  server.get('/applicant/denied', (req, res) => {
+    const uid = req.query.uid;
+
+    if (!uid) {
+      return res.status(500).send({
+        error: true,
+        message: 'Invalid UID',
+      });
+    }
+
+    const guild = client.guilds.find(g => g.id === '398543362476605441');
+    
+    if (!guild) {
+      return res.status(500).send({
+        error: true,
+        message: 'Guild not found',
+      });
+    }
+
+    const user = guild.members.find(m => m.id === uid);
+
+    if (user) {
+      user.send(`Hey ${user.displayName}, after our Ambassador team reviewed your application, we've unanimously decided to deny your application.\n While this application might've been denied, we suggest you reapply in 1-2 weeks.`)
+        .catch(console.log);
+
+      return res.status(200).send({
+        complete: true,
+      });
+    }
+
+    res.status(500).send({
+      complete: false,
+    });
+  });
+
   // Pings a recruit in the channel-signups for tags
   server.get('/applicant/channel-signup', (req, res) => {
     const uid = req.query.uid;
