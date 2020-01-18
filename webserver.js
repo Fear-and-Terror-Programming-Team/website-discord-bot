@@ -150,7 +150,7 @@ const startWebServer = client => {
     const user = guild.members.find(m => m.id === uid);
 
     if (user) {
-      user.send(`Hey ${user.displayName}, after our Ambassador team reviewed your application, we've unanimously decided to deny your application.\n While this application might've been denied, we suggest you reapply in 1-2 weeks.`)
+      user.send(`Hey ${user.displayName}, after our Ambassador team reviewed your application, we've unanimously decided to deny your application.\n While this application might've been denied, feel free to try again in 1-2 weeks.`)
         .catch(console.log);
 
       return res.status(200).send({
