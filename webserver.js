@@ -15,6 +15,34 @@ const startWebServer = client => {
     });
   });
 
+  // A new application is ready for voting
+  server.get('/application', (req, res) => {
+    const uid = req.query.uid;
+    const id = req.query.id;
+
+    if (!uid) {
+      return res.status(500).send({
+        error: true,
+        message: 'Invalid UID',
+      });
+    }
+
+    const guild = client.guilds.find(g => g.id === '398543362476605441');
+    const channel = guild.channels.find(c => c.id === '664290402144092161'); // application-voting-test
+    
+    if (channel) {
+      channel.send(`<@491656150073475082> \n A new application has been posted by <@${uid}>. Please place your votes!\n http://personnel.fearandterror.com/applications/${id}`);
+
+      return res.status(200).send({
+        complete: true,
+      });
+    }
+
+    res.status(500).send({
+      complete: false,
+    });
+  });
+
   // A new applicant passed voting
   server.get('/applicant/welcome', (req, res) => {
     const uid = req.query.uid;
@@ -73,6 +101,9 @@ const startWebServer = client => {
     if (user && applicant && recruit) {
       user.removeRole(applicant).catch(console.log);
       user.addRole(recruit).catch(console.log);
+
+      user.send(`Hey ${user.displayName}, welcome to Fear and Terror! Here's a link to Fear and Terrors Steam Group https://steamcommunity.com/groups/FearandTerror`)
+        .catch(console.log);
 
       if (!user.displayName.includes('[FaTr]')) {
         user.setNickname(`[FaTr] ${user.displayName}`)

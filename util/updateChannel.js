@@ -2,6 +2,10 @@ const io = require('@pm2/io');
 const Channels = require('../models/Channels');
 
 const updateChannel = (channel, access = true) => {
+  if (channel.type === 'dm') {
+    return;
+  }
+
   Channels.findAll({
     where: {
       channelId: channel.id,
