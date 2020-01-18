@@ -8,8 +8,8 @@ const VoiceActivity = Database.db.define('voiceActivity', {
   channelName: Sequelize.STRING,
   channelId: Sequelize.STRING,
   time: Sequelize.BIGINT,
-  jointime: Sequelize.TIME,
-  leavetime: Sequelize.TIME,
+  jointime: Sequelize.DATE,
+  leavetime: Sequelize.DATE,
 }, {
   indexes: [
     { fields: ['userId'] },

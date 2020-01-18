@@ -1,101 +1,146 @@
 const express = require('express');
-const passport = require('passport');
-const session = require('express-session');
-const SteamStrategy = require('passport-steam').Strategy;
 const server = express();
-const port = 3000;
+const port = 4500;
 
 const User = require('./models/User');
 
 // Config
 const config = require('./config.json');
 
-const startWebServer = () => {
+const startWebServer = client => {
 
-  passport.serializeUser(function(user, done) {
-    done(null, user);
-  });
-  
-  passport.deserializeUser(function(obj, done) {
-    done(null, obj);
+  server.get('/', (req, res) => {
+    res.status(200).send({
+      online: true,
+    });
   });
 
-  passport.use(new SteamStrategy(
-    {
-      returnURL: 'http://localhost:3000/auth/steam/return',
-      realm: 'http://localhost:3000/',
-      apiKey: config.steamApiKey,
-    },
-    (identifier, profile, done) => {
-      process.nextTick(() => {
-        profile.identifier = identifier;
-        return done(null, profile);
+  // A new applicant passed voting
+  server.get('/applicant/welcome', (req, res) => {
+    const uid = req.query.uid;
+
+    if (!uid) {
+      return res.status(500).send({
+        error: true,
+        message: 'Invalid UID',
       });
     }
-  ));
 
-  server.use(session({
-    secret: 'Lt*reR9Am(}Sp`JD42@xvK/N67EZ}e993Ss:hS54RfU"^smF!yb}uwmMH@R92[r!TgNd!jp6<_J.Ce_CsMb_-^f>&pxE]K5EpR+/',
-    name: 'FaT-Steam-Auth',
-    resave: true,
-    saveUninitialized: true,
-  }));
-  
-  server.use(passport.initialize());
-  server.use(passport.session());
+    const guild = client.guilds.find(g => g.id === '398543362476605441');
+    const channel = guild.channels.find(c => c.id === '556582292110180360'); // applicant-general channel
+    const role = guild.roles.find(r => r.id === '555959863872716813'); // Applicant role
+    const user = guild.members.find(m => m.id === uid);
 
-  server.get("/", (req, res, next) => {
-    if (req.user) {
-      const discordId = req.session.discordId;
-      const guildId = req.session.guildId;
-      const steamId = req.user._json.steamid;
+    if (user && role && channel) {
+      user.addRole(role).catch(console.log);
+      
+      channel.send(`<@${uid}> your application has been APPROVED! Please refer to the <#577622870440673280> channel on how to proceed on becoming a member of Fear and Terror!`);
 
-      // Update the user here
-      if (steamId && discordId && guildId) {
-        User.update({ steamId }, { where: { userId: discordId, guild: guildId } })
-          .catch(err => console.error(err));
+      return res.status(200).send({
+        complete: true,
+      });
+    }
+
+    res.status(500).send({
+      complete: false,
+    });
+  });
+
+  // Gives the applicants recruit tags, removes 
+  server.get('/applicant/accepted', (req, res) => {
+    const uid = req.query.uid;
+
+    if (!uid) {
+      return res.status(500).send({
+        error: true,
+        message: 'Invalid UID',
+      });
+    }
+
+    const guild = client.guilds.find(g => g.id === '398543362476605441');
+    
+    if (!guild) {
+      return res.status(500).send({
+        error: true,
+        message: 'Guild not found',
+      });
+    }
+
+    const applicant = guild.roles.find(r => r.id === '555959863872716813'); // Applicant role
+    const recruit = guild.roles.find(r => r.id === '398547748900831234'); // Recruit role
+    const user = guild.members.find(m => m.id === uid);
+
+    if (user && applicant && recruit) {
+      user.removeRole(applicant).catch(console.log);
+      user.addRole(recruit).catch(console.log);
+
+      if (!user.displayName.includes('[FaTr]')) {
+        user.setNickname(`[FaTr] ${user.displayName}`)
+          .then(() => {
+            return res.status(200).send({
+              complete: true,
+            });
+          })
+          .catch(err => {
+            return res.status(500).send({
+              error: true,
+              message: 'No permissions',
+            });
+          });
+
+        return;
       }
-
-      return res.send(`
-      <html>
-        <head>
-          <title>FaT Steam Auth</title>
-        </head>
-        <body>
-          <h1 style="text-align: center;padding: 50px;">
-            Hooray! We're done linking your steam account. Thanks!
-          </h1>
-        </body>
-      </html>
-      `);
     }
 
-    const id = req.query.id;
-    const guildId = req.query.guild;
-    if (!id || !guildId) {
-      return res.json({ error: 'Invalid ID or Guild' });
+    res.status(500).send({
+      complete: false,
+    });
+  });
+
+  // Pings a recruit in the channel-signups for tags
+  server.get('/applicant/channel-signup', (req, res) => {
+    const uid = req.query.uid;
+
+    if (!uid) {
+      return res.status(500).send({
+        error: true,
+        message: 'Invalid UID',
+      });
     }
 
-    req.session.discordId = id;
-    req.session.guildId = guildId;
+    const guild = client.guilds.find(g => g.id === '398543362476605441');
+    
+    if (!guild) {
+      return res.status(500).send({
+        error: true,
+        message: 'Guild not found',
+      });
+    }
+    
+    const user = guild.members.find(m => m.id === uid);
+    const channel = guild.channels.find(c => c.id === '603283885442334758');
 
-    const state = id ? Buffer.from(JSON.stringify({ id })).toString('base64') : undefined;
-    const authenticator = passport.authenticate('steam', { scope: [], state });
-    return authenticator(req, res, next);
-  });
-  
-  server.get('/logout', function(req, res){
-    req.logout();
-    res.redirect('/');
-  });
+    if (user && channel) {
+      channel.send(`<@${uid}> Review this channel to signup for your main games and channels! This message will auto-delete in 10 seconds.`)
+        .then(message => {
+          message.delete(10000);
+        });
 
-  server.get('/auth/steam/return', passport.authenticate('steam', { failureRedirect: '/' }), (req, res) => {
-    res.redirect('/');
+      return res.status(200).send({
+        complete: true,
+      });
+    }
+
+    res.status(500).send({
+      complete: false,
+    });
   });
   
   server.listen(port, () => {
-      console.log(`Steam Auth Server listening on port ${port}`);
+    console.log(`Listening on ${port}`);
   });
 }
 
-module.exports = startWebServer;
+module.exports = {
+  startWebServer,
+};

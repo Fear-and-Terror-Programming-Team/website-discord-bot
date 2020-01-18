@@ -1,5 +1,4 @@
 const Sequelize = require('sequelize');
-
 const Database = require('../structures/PostgreSQL');
 
 const User = Database.db.define('user', {
@@ -12,12 +11,15 @@ const User = Database.db.define('user', {
 		type: Sequelize.ENUM,
 		values: [ '','pending','recruit','member','leader','moderator','administrator','asst-manager','manager','director' ],
 	},
-	roles: Sequelize.TEXT,
-	avatar: Sequelize.STRING,
+  roles: Sequelize.TEXT,
+  avatar: Sequelize.STRING,
+  ambassador: Sequelize.STRING,
+  joindate: Sequelize.TIME,
+  tz: Sequelize.STRING,
+  military: Sequelize.STRING,
 }, {
 	indexes: [
 		{ fields: ['userId','guild'] },
 	],
 });
-
 module.exports = User;

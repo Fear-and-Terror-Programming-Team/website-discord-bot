@@ -13,7 +13,7 @@ const createRole = require('./util/createRole');
 const trackVoiceActivity = require('./events/trackVoiceActivity');
 const trackMessageActivity = require('./events/trackMessageActivity');
 const compareUserForUpdate = require('./util/compareUser');
-const startWebServer = require('./webserver');
+const { startWebServer } = require('./webserver');
 const startSquadRconMonitors = require('./structures/RconClient');
 const compareRoleForUpdate = require('./util/compareRole');
 const updateChannel = require('./util/updateChannel');
@@ -21,10 +21,6 @@ const moment = require('moment');
 
 // Config
 const config = require('./config.json');
-
-// Side Processes
-startWebServer();
-startSquadRconMonitors();
 
 // Discord Bot
 const client = new CommandoClient({
@@ -46,37 +42,37 @@ client.on('error', winston.error)
 		client.user.setActivity('Moinitoring Activity...');
 		
 		setTimeout(() => {
-			// Go through all our guilds, create new members for people we've missed while offline...
-			console.log('Starting to sync all users...');
+			// // Go through all our guilds, create new members for people we've missed while offline...
+			// console.log('Starting to sync all users...');
 
-			client.guilds.forEach(guild => {
-				let userCount = 0;
+			// client.guilds.forEach(guild => {
+			// 	let userCount = 0;
 				
-				guild.members.forEach(member => {
-					createUser(member);
-					userCount += 1;
-				});
+			// 	guild.members.forEach(member => {
+			// 		createUser(member);
+			// 		userCount += 1;
+			// 	});
 
-				console.log(`Tried to sync ${userCount} members - Guild Members: ${guild.memberCount}`);
-			});
+			// 	console.log(`Tried to sync ${userCount} members - Guild Members: ${guild.memberCount}`);
+			// });
 
-			setTimeout(() => {
-				client.guilds.forEach(guild => {
-					guild.roles.forEach(role => {
-						createRole(role);
-					});
+			// setTimeout(() => {
+			// 	client.guilds.forEach(guild => {
+			// 		guild.roles.forEach(role => {
+			// 			createRole(role);
+			// 		});
 
-					guild.channels.forEach(channel => {
-						if (channel.type == 'text') {
-							channel.fetchMessages({ limit: 2 })
-								.then(() => updateChannel(channel, true))
-								.catch(() => updateChannel(channel, false));
-						} else {
-							updateChannel(channel);
-						}
-					});
-				});
-			}, 5000);
+			// 		guild.channels.forEach(channel => {
+			// 			if (channel.type == 'text') {
+			// 				channel.fetchMessages({ limit: 2 })
+			// 					.then(() => updateChannel(channel, true))
+			// 					.catch(() => updateChannel(channel, false));
+			// 			} else {
+			// 				updateChannel(channel);
+			// 			}
+			// 		});
+			// 	});
+			// }, 5000);
 			
 		}, 10000);
   })
@@ -202,34 +198,7 @@ client.registry
 
 client.login(config.token);
 
-
-// const VoiceActivity = require('./models/VoiceActivity');
-
-
-// VoiceActivity
-// .findAll()
-// .then(results => {
-// 		let rowCount = 0;
-// 		results.forEach(voice => {
-
-// 			rowCount++;
-// 			const createdAt = voice.get('createdAt');
-// 			const time = parseInt(voice.get('time'), 0);
-
-// 			voice.update({
-// 				jointime: moment(createdAt).utc().subtract(Math.floor(time), 'seconds').toDate(),
-// 				leavetime: moment(createdAt).utc().toDate(),
-// 			});
-
-// 		});
-
-// 		console.log(`Finished ${rowCount} rows`);
-// 	})
-// 	.catch(err => {
-// 		console.log(err);
-// 	})
-
-
-// GUILD_MEMBER_ADD
-// GUILD_MEMBER_REMOVE
-// GUILD_BAN_ADD
+// Side Processes
+startWebServer(client);
+// We don't use this atm
+// startSquadRconMonitors();
