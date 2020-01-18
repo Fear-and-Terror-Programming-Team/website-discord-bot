@@ -42,37 +42,37 @@ client.on('error', winston.error)
 		client.user.setActivity('Moinitoring Activity...');
 		
 		setTimeout(() => {
-			// // Go through all our guilds, create new members for people we've missed while offline...
-			// console.log('Starting to sync all users...');
+			// Go through all our guilds, create new members for people we've missed while offline...
+			console.log('Starting to sync all users...');
 
-			// client.guilds.forEach(guild => {
-			// 	let userCount = 0;
+			client.guilds.forEach(guild => {
+				let userCount = 0;
 				
-			// 	guild.members.forEach(member => {
-			// 		createUser(member);
-			// 		userCount += 1;
-			// 	});
+				guild.members.forEach(member => {
+					createUser(member);
+					userCount += 1;
+				});
 
-			// 	console.log(`Tried to sync ${userCount} members - Guild Members: ${guild.memberCount}`);
-			// });
+				console.log(`Tried to sync ${userCount} members - Guild Members: ${guild.memberCount}`);
+			});
 
-			// setTimeout(() => {
-			// 	client.guilds.forEach(guild => {
-			// 		guild.roles.forEach(role => {
-			// 			createRole(role);
-			// 		});
+			setTimeout(() => {
+				client.guilds.forEach(guild => {
+					guild.roles.forEach(role => {
+						createRole(role);
+					});
 
-			// 		guild.channels.forEach(channel => {
-			// 			if (channel.type == 'text') {
-			// 				channel.fetchMessages({ limit: 2 })
-			// 					.then(() => updateChannel(channel, true))
-			// 					.catch(() => updateChannel(channel, false));
-			// 			} else {
-			// 				updateChannel(channel);
-			// 			}
-			// 		});
-			// 	});
-			// }, 5000);
+					guild.channels.forEach(channel => {
+						if (channel.type == 'text') {
+							channel.fetchMessages({ limit: 2 })
+								.then(() => updateChannel(channel, true))
+								.catch(() => updateChannel(channel, false));
+						} else {
+							updateChannel(channel);
+						}
+					});
+				});
+			}, 5000);
 			
 		}, 10000);
   })
