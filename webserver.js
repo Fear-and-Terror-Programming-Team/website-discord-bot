@@ -29,7 +29,7 @@ const startWebServer = client => {
     }
 
     const guild = client.guilds.find(g => g.id === '398543362476605441');
-    const channel = guild.channels.find(c => c.id === '664290402144092161'); // application-voting-test
+    const channel = guild.channels.find(c => c.id === '602969331269369856'); // application-voting-test
     
     if (channel) {
       channel.send(`<@&491656150073475082> \n A new application has been posted by <@${uid}>. Please place your votes!\n http://personnel.fearandterror.com/applications/${id}`);
