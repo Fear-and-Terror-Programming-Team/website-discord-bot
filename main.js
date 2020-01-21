@@ -39,7 +39,7 @@ client.setProvider(new SequelizeProvider(client.database));
 client.on('error', winston.error)
 	.on('warn', winston.warn)
 	.once('ready', () => {
-		client.user.setActivity('Moinitoring Activity...');
+		client.user.setActivity('Monitoring Activity...');
 		
 		setTimeout(() => {
 			// Go through all our guilds, create new members for people we've missed while offline...
