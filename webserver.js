@@ -3,6 +3,7 @@ const server = express();
 const port = 4500;
 const { UserVoiceState, logVoiceChannelActivity } = require('./events/trackVoiceActivity');
 
+const Applications = require('./models/Applications');
 const User = require('./models/User');
 
 // Config
@@ -14,6 +15,28 @@ const startWebServer = client => {
     res.status(200).send({
       online: true,
     });
+  });
+
+  // Delete old application voting messages
+  server.get('/application/voting/delete', (req, res) => {
+
+    const id = req.query.id;
+
+    const guild = client.guilds.find(g => g.id === '398543362476605441');
+    const channel = guild.channels.find(c => c.id === '602969331269369856');
+
+    channel.fetchMessage(id)
+      .then(msg => {
+        msg.delete();
+        return res.status(200).send({
+          complete: true,
+        });
+      })
+      .catch(err => {
+        return res.status(500).send({
+          complete: false,
+        });
+      });
   });
 
   // A new application is ready for voting
@@ -32,11 +55,40 @@ const startWebServer = client => {
     const channel = guild.channels.find(c => c.id === '602969331269369856'); // application-voting-test
     
     if (channel) {
-      channel.send(`<@&491656150073475082> \n A new application has been posted by <@${uid}>. Please place your votes!\n http://personnel.fearandterror.com/applications/${id}`);
+      return channel.send(`<@&491656150073475082> \n A new application has been posted by <@${uid}>. Please place your votes!\n http://personnel.fearandterror.com/applications/${id}`)
+        .then(message => {
 
-      return res.status(200).send({
-        complete: true,
-      });
+          // Update the application w/ the message id so we can delete it later
+          return Applications.update({
+            votemessage: message.id,
+          }, {
+            where: {
+              id,
+            },
+          })
+            .then(result => {
+              console.log(result);
+              return res.status(200).send({
+                complete: true,
+              });
+            }, err => {
+              console.log(err);
+              
+              return res.status(500).send({
+                complete: false,
+              });
+            });
+
+
+          // 672146165554348062
+          // 602969331269369856 - Channel ID
+        })
+        .catch(err => {
+          console.log(err);
+          res.status(500).send({
+            complete: false,
+          });
+        });
     }
 
     res.status(500).send({

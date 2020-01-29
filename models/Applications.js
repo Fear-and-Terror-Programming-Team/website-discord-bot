@@ -1,5 +1,5 @@
 const Sequelize = require('sequelize');
-const { Database } = require('../structures/PostgreSQL');
+const Database = require('../structures/PostgreSQL');
 
 const Applications = Database.db.define('applications', {
   userId: Sequelize.STRING,
@@ -21,6 +21,7 @@ const Applications = Database.db.define('applications', {
   downvotes: Sequelize.INTEGER,
   notes: Sequelize.JSONB,
   dateAccepted: Sequelize.DATE,
+  votemessage: Sequelize.TEXT,
 });
 
 module.exports = Applications;
