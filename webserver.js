@@ -11,6 +11,19 @@ const config = require('./config.json');
 
 const startWebServer = client => {
 
+  server.use(function (req, res, next) {
+    const token = req.query.token;
+    
+    if (token !== config.apiToken) {
+      return res.status(500).send({
+        error: true,
+        message: 'Invalid Token',
+      });
+    }
+
+    next()
+  });
+
   server.get('/', (req, res) => {
     res.status(200).send({
       online: true,
