@@ -46,8 +46,9 @@ const startWebServer = client => {
         });
       })
       .catch(err => {
-        return res.status(500).send({
+        return res.status(200).send({
           complete: false,
+          message: 'message doesnt exist',
         });
       });
   });
