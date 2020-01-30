@@ -2,6 +2,7 @@ const express = require('express');
 const server = express();
 const port = 4500;
 const { UserVoiceState, logVoiceChannelActivity } = require('./events/trackVoiceActivity');
+const io = require('@pm2/io');
 
 const Applications = require('./models/Applications');
 
@@ -141,6 +142,15 @@ const startWebServer = client => {
       });
     }
 
+    if (!user) {
+      io.notifyError(new Error('[Application] User Application Approval failed'), {
+        custom: {
+          error: 'Failed to find user for promotion to applicant',
+          userId: userId,
+        }
+      });
+    }
+
     res.status(500).send({
       complete: false,
     });
@@ -193,6 +203,15 @@ const startWebServer = client => {
 
         return;
       }
+    }
+
+    if (!user) {
+      io.notifyError(new Error('[Application] Recruit Promition'), {
+        custom: {
+          error: 'Failed to find user for promotion to recruit',
+          userId: userId,
+        }
+      });
     }
 
     res.status(500).send({
