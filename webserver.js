@@ -146,7 +146,7 @@ const startWebServer = client => {
       io.notifyError(new Error('[Application] User Application Approval failed'), {
         custom: {
           error: 'Failed to find user for promotion to applicant',
-          userId: userId,
+          userId: uid,
         }
       });
     }
@@ -209,7 +209,7 @@ const startWebServer = client => {
       io.notifyError(new Error('[Application] Recruit Promition'), {
         custom: {
           error: 'Failed to find user for promotion to recruit',
-          userId: userId,
+          userId: uid,
         }
       });
     }
