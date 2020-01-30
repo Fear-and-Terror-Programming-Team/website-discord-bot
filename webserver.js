@@ -4,7 +4,6 @@ const port = 4500;
 const { UserVoiceState, logVoiceChannelActivity } = require('./events/trackVoiceActivity');
 
 const Applications = require('./models/Applications');
-const User = require('./models/User');
 
 // Config
 const config = require('./config.json');
