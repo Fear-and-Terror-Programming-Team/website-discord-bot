@@ -38,19 +38,25 @@ const startWebServer = client => {
     const guild = client.guilds.find(g => g.id === '398543362476605441');
     const channel = guild.channels.find(c => c.id === '602969331269369856');
 
-    channel.fetchMessage(id)
-      .then(msg => {
-        msg.delete();
-        return res.status(200).send({
-          complete: true,
+    try {
+      channel.fetchMessage(id)
+        .then(msg => {
+          msg.delete();
+          return res.status(200).send({
+            complete: true,
+          });
+        })
+        .catch(err => {
+          return res.status(200).send({
+            complete: false,
+            message: 'message doesnt exist',
+          });
         });
-      })
-      .catch(err => {
-        return res.status(200).send({
-          complete: false,
-          message: 'message doesnt exist',
-        });
+    } catch (e) {
+      return res.status(200).send({
+        complete: false,
       });
+    }
   });
 
   // A new application is ready for voting
