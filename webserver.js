@@ -3,6 +3,8 @@ const server = express();
 const port = 4500;
 const { UserVoiceState, logVoiceChannelActivity } = require('./events/trackVoiceActivity');
 const io = require('@pm2/io');
+const { RichEmbed } = require('discord.js');
+
 
 const Applications = require('./models/Applications');
 
@@ -164,6 +166,58 @@ const startWebServer = client => {
       });
   });
 
+  server.get('/applicant/completed', (req, res) => {
+    const uid = req.query.uid;
+    const steamId = req.query.steamId;
+    const military = req.query.military;
+    const tz = req.query.tz;
+    const ambassador = req.query.ambassador;
+
+    if (!uid) {
+      return res.status(500).send({
+        error: true,
+        message: 'Invalid UID',
+      });
+    }
+
+    const guild = client.guilds.find(g => g.id === '398543362476605441');
+    
+    if (!guild) {
+      return res.status(500).send({
+        error: true,
+        message: 'Guild not found',
+      });
+    }
+
+    const records = guild.channels.find(c => c.id === '614521285917278239'); // FaT-Records Channel
+
+    if (records) {
+      guild.fetchMember(ambassador)
+        .then(ambassador => {
+          const embed = new RichEmbed()
+            .setAuthor(ambassador.nickname || ambassador.username)
+            .setImage(ambassador.avatarURL)
+            .addField('Recruit', `<@${uid}>`, true)
+            .addField('Steam ID', steamId, true)
+            .addField('Military', military, true)
+            .addField('Timezone', tz, true)
+            .setColor(0x00AE86)
+            .setTimestamp();
+
+            records.send(embed);
+
+            return res.status(200).send({
+              complete: true,
+            });
+        }).catch(err => {
+          console.log(err);
+          return res.status(500).send({
+            complete: false,
+          });
+        });
+    }
+  });
+
   // Gives the applicants recruit tags, removes 
   server.get('/applicant/accepted', (req, res) => {
     const uid = req.query.uid;
@@ -299,30 +353,20 @@ const startWebServer = client => {
   
     const channel = guild.channels.find(c => c.id === '603283885442334758');
 
-    guild.fetchMember(uid)
-      .then(user => {
-        if (user && channel) {
-          channel.send(`<@${uid}> Review this channel to signup for your main games and channels! This message will auto-delete in 10 seconds.`)
-            .then(message => {
-              message.delete(10000);
-            });
-    
-          return res.status(200).send({
-            complete: true,
-          });
-        }
-    
-        res.status(500).send({
-          complete: false,
+    if (channel) {
+      channel.send(`<@${uid}> Review this channel to signup for your main games and channels! This message will auto-delete in 10 seconds.`)
+        .then(message => {
+          message.delete(10000);
         });
-      })
-      .catch(err => {
-        console.log(err);
-        res.status(500).send({
-          complete: false,
-        });
-      });
 
+      return res.status(200).send({
+        complete: true,
+      });
+    }
+
+    res.status(500).send({
+      complete: false,
+    });
   });
 
   server.get('/update', (req, res) => {
