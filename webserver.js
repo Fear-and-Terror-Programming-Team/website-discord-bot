@@ -89,12 +89,11 @@ const startWebServer = client => {
             },
           })
             .then(result => {
-              console.log(result);
               return res.status(200).send({
                 complete: true,
               });
             }, err => {
-              console.log(err);
+              console.error(err);
               
               return res.status(500).send({
                 complete: false,
@@ -106,7 +105,7 @@ const startWebServer = client => {
           // 602969331269369856 - Channel ID
         })
         .catch(err => {
-          console.log(err);
+          console.error(err);
           res.status(500).send({
             complete: false,
           });
@@ -136,7 +135,7 @@ const startWebServer = client => {
     guild.fetchMember(uid)
       .then(user => {
         if (user && role && channel) {
-          user.addRole(role).catch(console.log);
+          user.addRole(role).catch(console.error);
           
           channel.send(`<@${uid}> your application has been APPROVED! Please refer to the <#577622870440673280> channel on how to proceed on becoming a member of Fear and Terror!`);
     
@@ -159,7 +158,7 @@ const startWebServer = client => {
         });
       })
       .catch(err => {
-        console.log(err);
+        console.error(err);
         res.status(500).send({
           complete: false,
         });
@@ -211,7 +210,7 @@ const startWebServer = client => {
               complete: true,
             });
         }).catch(err => {
-          console.log(err);
+          console.error(err);
           return res.status(500).send({
             complete: false,
           });
@@ -245,11 +244,11 @@ const startWebServer = client => {
     guild.fetchMember(uid)
       .then(user => {
         if (user && applicant && recruit) {
-          user.removeRole(applicant).catch(console.log);
-          user.addRole(recruit).catch(console.log);
+          user.removeRole(applicant).catch(console.error);
+          user.addRole(recruit).catch(console.error);
     
           user.send(`Hey ${user.displayName}, welcome to Fear and Terror! Here's a link to Fear and Terrors Steam Group https://steamcommunity.com/groups/FearandTerror`)
-            .catch(console.log);
+            .catch(console.error);
     
           if (!user.displayName.includes('[FaTr]')) {
             user.setNickname(`[FaTr] ${user.displayName}`)
@@ -283,7 +282,7 @@ const startWebServer = client => {
         });
       })
       .catch(err => {
-        console.log(err);
+        console.error(err);
         res.status(500).send({
           complete: false,
         });
@@ -313,7 +312,7 @@ const startWebServer = client => {
       .then(user => {
         if (user) {
           user.send(`Hey ${user.displayName}, after review by our Ambassador Team, your application has been denied. Please feel free to try again after a 2 week waiting period.`)
-            .catch(console.log);
+            .catch(console.error);
 
           return res.status(200).send({
             complete: true,
@@ -325,7 +324,7 @@ const startWebServer = client => {
         });
       })
       .catch(err => {
-        console.log(err);
+        console.error(err);
         res.status(500).send({
           complete: false,
         });
