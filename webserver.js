@@ -130,30 +130,38 @@ const startWebServer = client => {
     const guild = client.guilds.find(g => g.id === '398543362476605441');
     const channel = guild.channels.find(c => c.id === '556582292110180360'); // applicant-general channel
     const role = guild.roles.find(r => r.id === '555959863872716813'); // Applicant role
-    const user = guild.members.find(m => m.id === uid);
 
-    if (user && role && channel) {
-      user.addRole(role).catch(console.log);
-      
-      channel.send(`<@${uid}> your application has been APPROVED! Please refer to the <#577622870440673280> channel on how to proceed on becoming a member of Fear and Terror!`);
-
-      return res.status(200).send({
-        complete: true,
-      });
-    }
-
-    if (!user) {
-      io.notifyError(new Error('[Application] User Application Approval failed'), {
-        custom: {
-          error: 'Failed to find user for promotion to applicant',
-          userId: uid,
+    guild.fetchMember(uid)
+      .then(user => {
+        if (user && role && channel) {
+          user.addRole(role).catch(console.log);
+          
+          channel.send(`<@${uid}> your application has been APPROVED! Please refer to the <#577622870440673280> channel on how to proceed on becoming a member of Fear and Terror!`);
+    
+          return res.status(200).send({
+            complete: true,
+          });
         }
+    
+        if (!user) {
+          io.notifyError(new Error('[Application] User Application Approval failed'), {
+            custom: {
+              error: 'Failed to find user for promotion to applicant',
+              userId: uid,
+            }
+          });
+        }
+    
+        res.status(500).send({
+          complete: false,
+        });
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(500).send({
+          complete: false,
+        });
       });
-    }
-
-    res.status(500).send({
-      complete: false,
-    });
   });
 
   // Gives the applicants recruit tags, removes 
@@ -178,45 +186,53 @@ const startWebServer = client => {
 
     const applicant = guild.roles.find(r => r.id === '555959863872716813'); // Applicant role
     const recruit = guild.roles.find(r => r.id === '398547748900831234'); // Recruit role
-    const user = guild.members.find(m => m.id === uid);
 
-    if (user && applicant && recruit) {
-      user.removeRole(applicant).catch(console.log);
-      user.addRole(recruit).catch(console.log);
-
-      user.send(`Hey ${user.displayName}, welcome to Fear and Terror! Here's a link to Fear and Terrors Steam Group https://steamcommunity.com/groups/FearandTerror`)
-        .catch(console.log);
-
-      if (!user.displayName.includes('[FaTr]')) {
-        user.setNickname(`[FaTr] ${user.displayName}`)
-          .then(() => {
-            return res.status(200).send({
-              complete: true,
-            });
-          })
-          .catch(err => {
-            return res.status(500).send({
-              error: true,
-              message: 'No permissions',
-            });
-          });
-
-        return;
-      }
-    }
-
-    if (!user) {
-      io.notifyError(new Error('[Application] Recruit Promition'), {
-        custom: {
-          error: 'Failed to find user for promotion to recruit',
-          userId: uid,
+    guild.fetchMember(uid)
+      .then(user => {
+        if (user && applicant && recruit) {
+          user.removeRole(applicant).catch(console.log);
+          user.addRole(recruit).catch(console.log);
+    
+          user.send(`Hey ${user.displayName}, welcome to Fear and Terror! Here's a link to Fear and Terrors Steam Group https://steamcommunity.com/groups/FearandTerror`)
+            .catch(console.log);
+    
+          if (!user.displayName.includes('[FaTr]')) {
+            user.setNickname(`[FaTr] ${user.displayName}`)
+              .then(() => {
+                return res.status(200).send({
+                  complete: true,
+                });
+              })
+              .catch(err => {
+                return res.status(500).send({
+                  error: true,
+                  message: 'No permissions',
+                });
+              });
+    
+            return;
+          }
         }
+    
+        if (!user) {
+          io.notifyError(new Error('[Application] Recruit Promition'), {
+            custom: {
+              error: 'Failed to find user for promotion to recruit',
+              userId: uid,
+            }
+          });
+        }
+    
+        res.status(500).send({
+          complete: false,
+        });
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(500).send({
+          complete: false,
+        });
       });
-    }
-
-    res.status(500).send({
-      complete: false,
-    });
   });
 
   server.get('/applicant/denied', (req, res) => {
@@ -238,20 +254,27 @@ const startWebServer = client => {
       });
     }
 
-    const user = guild.members.find(m => m.id === uid);
+    guild.fetchMember(uid)
+      .then(user => {
+        if (user) {
+          user.send(`Hey ${user.displayName}, after review by our Ambassador Team, your application has been denied. Please feel free to try again after a 2 week waiting period.`)
+            .catch(console.log);
 
-    if (user) {
-      user.send(`Hey ${user.displayName}, after review by our Ambassador Team, your application has been denied. Please feel free to try again after a 2 week waiting period.`)
-        .catch(console.log);
+          return res.status(200).send({
+            complete: true,
+          });
+        }
 
-      return res.status(200).send({
-        complete: true,
+        res.status(500).send({
+          complete: false,
+        });
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(500).send({
+          complete: false,
+        });
       });
-    }
-
-    res.status(500).send({
-      complete: false,
-    });
   });
 
   // Pings a recruit in the channel-signups for tags
@@ -273,24 +296,33 @@ const startWebServer = client => {
         message: 'Guild not found',
       });
     }
-    
-    const user = guild.members.find(m => m.id === uid);
+  
     const channel = guild.channels.find(c => c.id === '603283885442334758');
 
-    if (user && channel) {
-      channel.send(`<@${uid}> Review this channel to signup for your main games and channels! This message will auto-delete in 10 seconds.`)
-        .then(message => {
-          message.delete(10000);
+    guild.fetchMember(uid)
+      .then(user => {
+        if (user && channel) {
+          channel.send(`<@${uid}> Review this channel to signup for your main games and channels! This message will auto-delete in 10 seconds.`)
+            .then(message => {
+              message.delete(10000);
+            });
+    
+          return res.status(200).send({
+            complete: true,
+          });
+        }
+    
+        res.status(500).send({
+          complete: false,
         });
-
-      return res.status(200).send({
-        complete: true,
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(500).send({
+          complete: false,
+        });
       });
-    }
 
-    res.status(500).send({
-      complete: false,
-    });
   });
 
   server.get('/update', (req, res) => {
