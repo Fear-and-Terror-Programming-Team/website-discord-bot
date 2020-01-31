@@ -14,7 +14,7 @@ const Applications = Database.db.define('applications', {
   found: Sequelize.TEXT,
 	status: {
     type: Sequelize.ENUM,
-		values: [ 'voting', 'vote-review', 'pending-interview', 'paused', 'accepted', 'denied' ],
+		values: [ 'voting', 'vote-review', 'pending-introduction', 'paused', 'accepted', 'denied' ],
   },
   votes: Sequelize.JSONB,
   upvotes: Sequelize.INTEGER,
