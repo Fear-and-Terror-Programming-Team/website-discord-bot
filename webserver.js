@@ -196,11 +196,11 @@ const startWebServer = client => {
           const embed = new RichEmbed()
             .setAuthor(ambassador.nickname || ambassador.username)
             .setImage(ambassador.avatarURL)
-            .addField('Recruit', `<@${uid}>`, true)
-            .addField('Steam ID', steamId, true)
-            .addField('Military', military, true)
-            .addField('Timezone', tz, true)
-            .url(`http://personnel.fearandterror.com/user/${uid}`)
+            .addField('Recruit', `<@${uid}>`, false)
+            .addField('Steam ID', steamId, false)
+            .addField('Military', military, false)
+            .addField('Timezone', tz, false)
+            .addField('Profile', `http://personnel.fearandterror.com/user/${uid}`, false)
             .setColor(0x00AE86)
             .setTimestamp();
 
