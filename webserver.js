@@ -201,6 +201,7 @@ const startWebServer = client => {
             .addField('Steam ID', steamId, true)
             .addField('Military', military, true)
             .addField('Timezone', tz, true)
+            .url(`http://personnel.fearandterror.com/user/${uid}`)
             .setColor(0x00AE86)
             .setTimestamp();
 
