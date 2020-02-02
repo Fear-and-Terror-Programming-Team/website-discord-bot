@@ -18,6 +18,9 @@ const startSquadRconMonitors = require('./structures/RconClient');
 const compareRoleForUpdate = require('./util/compareRole');
 const updateChannel = require('./util/updateChannel');
 const moment = require('moment');
+const { guildMemberUpdate } = require('./events/guildMemberUpdate');
+const { guildMemberRemove } = require('./events/guildMemberRemove');
+const { guildBanAdd } = require('./events/guildBanAdd');
 
 // Config
 const config = require('./config.json');
@@ -137,6 +140,12 @@ client.on('error', winston.error)
 	.on('guildMemberUpdate', compareUserForUpdate);
 
 client.on('message', trackMessageActivity);
+client.on('guildMemberUpdate', guildMemberUpdate);
+
+// Todo: Write ban logging...
+client.on('guildBanAdd', guildBanAdd);
+
+client.on('guildMemberRemove', guildMemberRemove);
 
 client.on('roleCreate', role => {
 	Roles.create({
