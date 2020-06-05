@@ -37,7 +37,7 @@ const startWebServer = client => {
 
     const id = req.query.id;
 
-    const guild = client.guilds.find(g => g.id === '398543362476605441');
+    const guild = client.guilds.find(g => g.id === config.guildId);
     const channel = guild.channels.find(c => c.id === '602969331269369856');
 
     try {
@@ -73,11 +73,11 @@ const startWebServer = client => {
       });
     }
 
-    const guild = client.guilds.find(g => g.id === '398543362476605441');
+    const guild = client.guilds.find(g => g.id === config.guildId);
     const channel = guild.channels.find(c => c.id === '602969331269369856'); // application-voting-test
     
     if (channel) {
-      return channel.send(`<@&491656150073475082> \n A new application has been posted by <@${uid}>. Please place your votes!\n http://personnel.fearandterror.com/applications/${id}`)
+      return channel.send(`<@&491656150073475082> \n A new application has been posted by <@${uid}>. Please place your votes!\n http://${config.urls.personnel}/applications/${id}`)
         .then(message => {
 
           // Update the application w/ the message id so we can delete it later
@@ -128,7 +128,7 @@ const startWebServer = client => {
       });
     }
 
-    const guild = client.guilds.find(g => g.id === '398543362476605441');
+    const guild = client.guilds.find(g => g.id === config.guildId);
     const channel = guild.channels.find(c => c.id === '556582292110180360'); // applicant-general channel
     const role = guild.roles.find(r => r.id === '555959863872716813'); // Applicant role
 
@@ -179,7 +179,7 @@ const startWebServer = client => {
       });
     }
 
-    const guild = client.guilds.find(g => g.id === '398543362476605441');
+    const guild = client.guilds.find(g => g.id === config.guildId);
     
     if (!guild) {
       return res.status(500).send({
@@ -200,7 +200,7 @@ const startWebServer = client => {
             .addField('Steam ID', steamId, false)
             .addField('Military', military, false)
             .addField('Timezone', tz, false)
-            .addField('Profile', `http://personnel.fearandterror.com/user/${uid}`, false)
+            .addField('Profile', `http://${config.urls.personnel}/user/${uid}`, false)
             .setColor(0x00AE86)
             .setTimestamp();
 
@@ -229,7 +229,7 @@ const startWebServer = client => {
       });
     }
 
-    const guild = client.guilds.find(g => g.id === '398543362476605441');
+    const guild = client.guilds.find(g => g.id === config.guildId);
     
     if (!guild) {
       return res.status(500).send({
@@ -299,7 +299,7 @@ const startWebServer = client => {
       });
     }
 
-    const guild = client.guilds.find(g => g.id === '398543362476605441');
+    const guild = client.guilds.find(g => g.id === config.guildId);
     
     if (!guild) {
       return res.status(500).send({
@@ -342,7 +342,7 @@ const startWebServer = client => {
       });
     }
 
-    const guild = client.guilds.find(g => g.id === '398543362476605441');
+    const guild = client.guilds.find(g => g.id === config.guildId);
     
     if (!guild) {
       return res.status(500).send({

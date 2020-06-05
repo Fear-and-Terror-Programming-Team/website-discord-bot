@@ -6,7 +6,7 @@ const config = require('../config.json');
 const database = new Sequelize(config.database, {
 	logging: false,
   dialectOptions: {
-    ssl: true
+    ssl: false  // TODO: re-enable
 	},
 	pool: {
     max: 40,

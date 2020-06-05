@@ -27,7 +27,6 @@ const config = require('./config.json');
 
 // Discord Bot
 const client = new CommandoClient({
-	owner: config.owners,
 	commandPrefix: config.prefix,
 	unknownCommandResponse: false,
 	disableEveryone: true,
@@ -48,36 +47,38 @@ client.on('error', winston.error)
 			// Go through all our guilds, create new members for people we've missed while offline...
 			console.log('Starting to sync all users...');
 
-			client.guilds.forEach(guild => {
-				let userCount = 0;
-				
-				guild.members.forEach(member => {
-					createUser(member);
-					userCount += 1;
-				});
+			let guild = client.guilds.find(g => g.id === config.guildId);
+            if (guild === undefined) {
+            	console.warn(`Configured Discord guild (ID ${config.guildId} not found. `
+							 `Skipping synchronization. `
+							 `Has the bot not been added yet?`)
+                return;
+			}
 
-				console.log(`Tried to sync ${userCount} members - Guild Members: ${guild.memberCount}`);
-			});
+
+            console.log(`Starting synchronization of guild ${guild.name} with ${guild.memberCount} members.`)
+			guild.members.forEach(createUser);
+
+			console.log(`Synchronized users.`);
 
 			setTimeout(() => {
-				client.guilds.forEach(guild => {
-					guild.roles.forEach(role => {
-						createRole(role);
-					});
+				guild.roles.forEach(createRole);
+				console.log(`Synchronized roles.`);
 
-					guild.channels.forEach(channel => {
-						if (channel.type == 'text') {
-							channel.fetchMessages({ limit: 2 })
-								.then(() => updateChannel(channel, true))
-								.catch(() => updateChannel(channel, false));
-						} else {
-							updateChannel(channel);
-						}
-					});
+				guild.channels.forEach(channel => {
+					if (channel.type === 'text') {
+						channel.fetchMessages({ limit: 2 })
+							.then(() => updateChannel(channel, true))
+							.catch(() => updateChannel(channel, false));
+					} else {
+						updateChannel(channel);
+					}
 				});
-			}, 5000);
+				console.log(`Synchronized channels.`);
+				console.log(`Synchronization complete!`);
+			}, 0);
 			
-		}, 10000);
+		}, 0);
   })
 	.on('ready', () => {
 		winston.info(oneLine`

@@ -31,6 +31,7 @@ const createUser = member => {
         username: member.user.username,
         nickname: member.nickname,
         guild: member.guild.id,
+        avatar: member.avatar,
         roles,
       }).then(res => {
         currentCreateUser.dec();

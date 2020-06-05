@@ -9,9 +9,9 @@ const updateChannel = (channel, access = true) => {
   Channels.findAll({
     where: {
       channelId: channel.id,
-      guild: channel.guild.id,
     },
   }).then(result => {
+    // create channel if it does not exist in DB
     if (result.length < 1) {
       Channels.create({
         channelId: channel.id,
@@ -29,26 +29,23 @@ const updateChannel = (channel, access = true) => {
       });
       return;
     }
-    
-    if (result[0].name !== channel.name || result[0].type !== channel.type) {
-      Channels.update({
-        name: channel.name,
-        type: channel.type,
-        access,
-      }, {
-        where: {
+
+    // update name and access
+    Channels.update({
+      name: channel.name,
+      access: access,
+    }, {
+      where: {
+        channelId: channel.id,
+      },
+    }).catch(err => {
+      io.notifyError(new Error('[DB] Update Channel'), {
+        custom: {
+          error: err,
           channelId: channel.id,
-          guild: channel.guild.id,
-        },
-      }).catch(err => {
-        io.notifyError(new Error('[DB] Update Channel'), {
-          custom: {
-            error: err,
-            channelId: channel.id,
-          }
-        });
+        }
       });
-    }
+    });
 
   }).catch(err => {
     io.notifyError(new Error('[DB] Find Channel'), {

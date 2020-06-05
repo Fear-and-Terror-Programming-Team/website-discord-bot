@@ -12,7 +12,7 @@ const trackedVoiceUsers = io.metric({
   id: 'app/realtime/voiceUsers',
 });
 
-const logVoiceChannelActivity = (userId, time, channel, guild = '398543362476605441') => {
+const logVoiceChannelActivity = (userId, time, channel, guild = config.guildId) => {
   // Don't track anything under set time
   if (time >= MIN_TRACK_TIME) {
     VoiceActivity.create({
