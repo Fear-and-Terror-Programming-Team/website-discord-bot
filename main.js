@@ -26,7 +26,7 @@ const config = require('./config.json');
 
 // Discord Bot
 const client = new CommandoClient({
-    commandPrefix: config.prefix,
+    commandPrefix: config.discordBot.commandPrefix,
     unknownCommandResponse: false,
     disableEveryone: true,
 });
@@ -205,7 +205,7 @@ client.registry
     .registerTypesIn(path.join(__dirname, 'types'))
     .registerCommandsIn(path.join(__dirname, 'commands'));
 
-client.login(config.token);
+client.login(config.discordBot.token);
 
 // Side Processes
 startWebServer(client);

@@ -14,12 +14,12 @@ const config = require('./config.json');
 const startWebServer = client => {
 
     server.use(function (req, res, next) {
-        const token = req.query.token;
+        const secret = req.query.secret;
 
-        if (token !== config.apiToken) {
+        if (secret !== config.applicationSecret) {  // TODO: BETTER SECURITY
             return res.status(500).send({
                 error: true,
-                message: 'Invalid Token',
+                message: 'Invalid Application Secret. d0n7 h4ck pl0x',
             });
         }
 
@@ -38,7 +38,7 @@ const startWebServer = client => {
         const id = req.query.id;
 
         const guild = client.guilds.find(g => g.id === config.guildId);
-        const channel = guild.channels.find(c => c.id === '602969331269369856');
+        const channel = guild.channels.find(c => c.id === config.discordChannels.votingChannel);
 
         try {
             channel.fetchMessage(id)
@@ -66,6 +66,8 @@ const startWebServer = client => {
         const uid = req.query.uid;
         const id = req.query.id;
 
+        console.log(`GOT APPLICATION: ${id} -- ${uid}`);
+
         if (!uid) {
             return res.status(500).send({
                 error: true,
@@ -74,10 +76,10 @@ const startWebServer = client => {
         }
 
         const guild = client.guilds.find(g => g.id === config.guildId);
-        const channel = guild.channels.find(c => c.id === '602969331269369856'); // application-voting-test
+        const channel = guild.channels.find(c => c.id === config.discordChannels.votingChannel); // application-voting-test
 
         if (channel) {
-            return channel.send(`<@&491656150073475082> \n A new application has been posted by <@${uid}>. Please place your votes!\n http://${config.urls.personnel}/applications/${id}`)
+            return channel.send(`<@&${config.discordRoles.ambassador}> \n A new application has been posted by <@${uid}>. Please place your votes!\n http://${config.urls.personnel}/applications/${id}`)
                 .then(message => {
 
                     // Update the application w/ the message id so we can delete it later
@@ -129,15 +131,15 @@ const startWebServer = client => {
         }
 
         const guild = client.guilds.find(g => g.id === config.guildId);
-        const channel = guild.channels.find(c => c.id === '556582292110180360'); // applicant-general channel
-        const role = guild.roles.find(r => r.id === '555959863872716813'); // Applicant role
+        const channel = guild.channels.find(c => c.id === config.discordChannels.applicantsGeneral);
+        const role = guild.roles.find(r => r.id === config.discordRoles.applicant);
 
         guild.fetchMember(uid)
             .then(user => {
                 if (user && role && channel) {
                     user.addRole(role).catch(console.error);
 
-                    channel.send(`<@${uid}> your application has been APPROVED! Please refer to the <#577622870440673280> channel on how to proceed on becoming a member of Fear and Terror!`);
+                    channel.send(`<@${uid}> your application has been APPROVED! Please refer to the <#${config.discordChannels.applicantInformation}> channel on how to proceed on becoming a member of Fear and Terror!`);
 
                     return res.status(200).send({
                         complete: true,
@@ -188,7 +190,7 @@ const startWebServer = client => {
             });
         }
 
-        const records = guild.channels.find(c => c.id === '614521285917278239'); // FaT-Records Channel
+        const records = guild.channels.find(c => c.id === config.discordChannels.fatRecords); // FaT-Records Channel
 
         if (records) {
             guild.fetchMember(ambassador)
@@ -238,8 +240,8 @@ const startWebServer = client => {
             });
         }
 
-        const applicant = guild.roles.find(r => r.id === '555959863872716813'); // Applicant role
-        const recruit = guild.roles.find(r => r.id === '398547748900831234'); // Recruit role
+        const applicant = guild.roles.find(r => r.id === config.discordRoles.applicant);
+        const recruit = guild.roles.find(r => r.id === config.discordRoles.recruit);
 
         guild.fetchMember(uid)
             .then(user => {
@@ -351,7 +353,7 @@ const startWebServer = client => {
             });
         }
 
-        const channel = guild.channels.find(c => c.id === '603283885442334758');
+        const channel = guild.channels.find(c => c.id === config.discordChannels.channelSignups);
 
         if (channel) {
             channel.send(`<@${uid}> Review this channel to signup for your main games and channels! This message will auto-delete in 10 seconds.`)

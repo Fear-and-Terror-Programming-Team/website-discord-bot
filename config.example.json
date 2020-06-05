@@ -1,17 +1,27 @@
 {
-  "owners": [
-    "287637021969743872"
-  ],
-  "prefix": ".",
-  "token": "my-awesome-token",
-  "steamApiKey": "my-steam-api-key",
-  "database": "postgres://user:password@ip-address:port/database-name",
-  "squad": [
-    {
-      "id": "server-1",
-      "host": "0.0.0.0",
-      "port": "7140",
-      "password": "my-awesome-password"
-    }
-  ]
+  "database": "postgres://doadmin@localhost/fearandterror",
+  "discordBot": {
+    "commandPrefix": ".",
+    "token": "BOT TOKEN HERE"
+  },
+  "guildId": "398543362476605441",
+  "discordRoles": {
+    "ambassador": "491656150073475082",
+    "applicant": "555959863872716813",
+    "recruit": "398547748900831234"
+  },
+  "discordChannels": {
+    "applicantsGeneral": "605298193990811669",
+    "applicantInformation": "605298193990811669",
+    "votingChannel": "605298193990811669",
+    "fatRecords": "605298193990811669",
+    "channelSignups": "605298193990811669"
+  },
+  "steamApiKey": "STEAM API KEY HERE",
+  "urls": {
+    "main": "localhost",
+    "personnel": "localhost:4200",
+    "api": "localhost:3000"
+  },
+  "applicationSecret": "APPLICATION SECRET HERE"
 }
