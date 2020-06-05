@@ -8,84 +8,84 @@ const MIN_TRACK_TIME = 15; // time in seconds
 let UserVoiceState = {};
 
 const trackedVoiceUsers = io.metric({
-  name: 'Tracked Voice Users',
-  id: 'app/realtime/voiceUsers',
+    name: 'Tracked Voice Users',
+    id: 'app/realtime/voiceUsers',
 });
 
 const logVoiceChannelActivity = (userId, time, channel, guild = config.guildId) => {
-  // Don't track anything under set time
-  if (time >= MIN_TRACK_TIME) {
-    VoiceActivity.create({
-      userId,
-      guild,
-      channelName: channel.name,
-      channelId: channel.id,
-      time: Math.floor(time),
-      jointime: moment().utc().subtract(Math.floor(time), 'seconds').toDate(),
-      leavetime: moment().utc().toDate(),
-    });
-  }
+    // Don't track anything under set time
+    if (time >= MIN_TRACK_TIME) {
+        VoiceActivity.create({
+            userId,
+            guild,
+            channelName: channel.name,
+            channelId: channel.id,
+            time: Math.floor(time),
+            jointime: moment().utc().subtract(Math.floor(time), 'seconds').toDate(),
+            leavetime: moment().utc().toDate(),
+        });
+    }
 }
 
 const trackVoiceActivity = (oldMember, newMember) => {
-  let newUserChannel = newMember.voiceChannel;
-  let oldUserChannel = oldMember.voiceChannel;
+    let newUserChannel = newMember.voiceChannel;
+    let oldUserChannel = oldMember.voiceChannel;
 
-  // Leaving a channel
-  if (oldUserChannel !== undefined) {
-    
-    // Both channel objects are set, check to see if they're going to a different channel
-    if (newUserChannel !== undefined) {
+    // Leaving a channel
+    if (oldUserChannel !== undefined) {
 
-      // Channel is the same, abort
-      if (oldUserChannel.id === newUserChannel.id) {
-        return;
-      }
+        // Both channel objects are set, check to see if they're going to a different channel
+        if (newUserChannel !== undefined) {
 
-      // Going to a different channel
-      if (UserVoiceState[newMember.id]) {
-        const session = UserVoiceState[newMember.id];
-        const currentTime = (Date.now() / 1000);
+            // Channel is the same, abort
+            if (oldUserChannel.id === newUserChannel.id) {
+                return;
+            }
 
-        logVoiceChannelActivity(newMember.id, (currentTime - session.joinTime), oldUserChannel, newMember.guild.id);
+            // Going to a different channel
+            if (UserVoiceState[newMember.id]) {
+                const session = UserVoiceState[newMember.id];
+                const currentTime = (Date.now() / 1000);
 
-        // We should have this already, update their channel id...
-        UserVoiceState[newMember.id] = {
-          channel: newUserChannel.id,
-          joinTime: currentTime,
-        };
+                logVoiceChannelActivity(newMember.id, (currentTime - session.joinTime), oldUserChannel, newMember.guild.id);
 
-      } else {
-        // Somehow we don't have any stored channels... maybe they were in when the bot turned on? Define it.
-        UserVoiceState[newMember.id] = {
-          channel: newUserChannel.id,
-          joinTime: (Date.now() / 1000),
-        };
-      }
-    
-    // The user is leaving from a voice channel going nowhere new
+                // We should have this already, update their channel id...
+                UserVoiceState[newMember.id] = {
+                    channel: newUserChannel.id,
+                    joinTime: currentTime,
+                };
+
+            } else {
+                // Somehow we don't have any stored channels... maybe they were in when the bot turned on? Define it.
+                UserVoiceState[newMember.id] = {
+                    channel: newUserChannel.id,
+                    joinTime: (Date.now() / 1000),
+                };
+            }
+
+            // The user is leaving from a voice channel going nowhere new
+        } else {
+            if (UserVoiceState[newMember.id]) {
+                const session = UserVoiceState[newMember.id];
+
+                logVoiceChannelActivity(newMember.id, ((Date.now() / 1000) - session.joinTime), oldUserChannel, newMember.guild.id);
+
+                delete UserVoiceState[newMember.id];
+
+                trackedVoiceUsers.set(Object.values(UserVoiceState).length);
+            }
+        }
     } else {
-      if (UserVoiceState[newMember.id]) {
-        const session = UserVoiceState[newMember.id];
+        // User joined a channel from nowhere
+        if (newUserChannel !== undefined) {
+            UserVoiceState[newMember.id] = {
+                channel: newUserChannel.id,
+                joinTime: (Date.now() / 1000),
+            };
 
-        logVoiceChannelActivity(newMember.id, ((Date.now() / 1000) - session.joinTime), oldUserChannel, newMember.guild.id);
-
-        delete UserVoiceState[newMember.id];
-
-        trackedVoiceUsers.set(Object.values(UserVoiceState).length);
-      }
+            trackedVoiceUsers.set(Object.values(UserVoiceState).length);
+        }
     }
-  } else {
-    // User joined a channel from nowhere
-    if (newUserChannel !== undefined) {
-      UserVoiceState[newMember.id] = {
-        channel: newUserChannel.id,
-        joinTime: (Date.now() / 1000),
-      };
-
-      trackedVoiceUsers.set(Object.values(UserVoiceState).length);
-    }
-  }
 }
 
-module.exports = { trackVoiceActivity, UserVoiceState, logVoiceChannelActivity };
+module.exports = {trackVoiceActivity, UserVoiceState, logVoiceChannelActivity};
