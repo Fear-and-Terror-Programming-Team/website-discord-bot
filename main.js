@@ -103,18 +103,24 @@ client.on('error', winston.error)
 	`);
     })
     .on('unknownCommand', msg => {
+        // TODO: Disabled commands for now, remove completely at some point
+        /*
         if (msg.channel.type === 'dm') return;
         if (msg.author.bot) return;
         if (msg.content.split(msg.guild.commandPrefix)[1] === 'undefined') return;
         const args = {name: msg.content.split(msg.guild.commandPrefix)[1].toLowerCase()};
         client.registry.resolveCommand('tags:tag').run(msg, args);
+         */
     })
     .on('message', async message => {
+        // TODO: Disabled commands for now, remove completely at some point
+        /*
         if (message.channel.type === 'dm') return;
         if (message.author.bot) return;
 
         const channelLocks = client.provider.get(message.guild.id, 'locks', []);
         if (channelLocks.includes(message.channel.id)) return;
+        */
     })
     .on('voiceStateUpdate', trackVoiceActivity)
     .on('commandError', (cmd, err) => {
@@ -196,6 +202,8 @@ client.on('channelUpdate', (old, channel) => {
     }
 });
 
+// TODO: Disabled commands for now, remove completely at some point
+/*
 client.registry
     .registerGroups([
         ['info', 'Info'],
@@ -204,6 +212,7 @@ client.registry
     .registerDefaults()
     .registerTypesIn(path.join(__dirname, 'types'))
     .registerCommandsIn(path.join(__dirname, 'commands'));
+ */
 
 client.login(config.discordBot.token);
 
