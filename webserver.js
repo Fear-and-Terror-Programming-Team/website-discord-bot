@@ -271,7 +271,7 @@ const startWebServer = client => {
                 }
 
                 if (!user) {
-                    io.notifyError(new Error('[Application] Recruit Promition'), {
+                    io.notifyError(new Error('[Application] Recruit Promotion'), {
                         custom: {
                             error: 'Failed to find user for promotion to recruit',
                             userId: uid,
