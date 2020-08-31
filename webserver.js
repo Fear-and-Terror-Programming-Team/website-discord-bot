@@ -13,10 +13,15 @@ const config = require('./config.json');
 
 const startWebServer = client => {
 
+    server.use(express.json());
     server.use(function (req, res, next) {
-        const secret = req.query.secret;
+        let secret = req.query.secret;
+        if (secret === undefined) {
+            secret = req.body.secret;
+        }
 
         if (secret !== config.applicationSecret) {  // TODO: BETTER SECURITY
+            console.log(`${secret} != ${config.applicationSecret}`)
             return res.status(500).send({
                 error: true,
                 message: 'Invalid Application Secret. d0n7 h4ck pl0x',
@@ -386,6 +391,44 @@ const startWebServer = client => {
             completed: true,
             users: count,
         });
+    });
+
+    // Gives the applicants recruit tags, removes
+    server.post('/activity-check/finalize', (req, res) => {
+        const toBeRemovedIdsRaw = req.body.toBeRemovedIds;
+
+        if (!toBeRemovedIdsRaw) {
+            return res.status(400).send({
+                error: true,
+                message: 'toBeRemovedIds must be supplied',
+            });
+        }
+        const toBeRemovedIds = new Set(toBeRemovedIdsRaw
+            .replace('"', '')
+            .replace('[', '')
+            .replace(']', '')
+            .replace(' ', '')
+            .split(','));
+
+        const guild = client.guilds.find(g => g.id === config.guildId);
+
+        if (!guild) {
+            return res.status(500).send({
+                error: true,
+                message: 'Guild not found',
+            });
+        }
+
+        const inactiveRole = guild.roles.find(r => r.id === config.discordRoles.inactive);
+
+        toBeRemovedIds.forEach((userId) => {
+            guild.fetchMember(userId)
+                .then(member => {
+                    console.log(`${member.displayName} got ${inactiveRole.name}`);
+                    // member.addRole(inactiveRole).catch(console.error); TODO: arm
+                });
+        });
+        res.status(200).send();
     });
 
     server.listen(port, () => {

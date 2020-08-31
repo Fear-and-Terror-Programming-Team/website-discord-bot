@@ -8,7 +8,8 @@
   "discordRoles": {
     "ambassador": "491656150073475082",
     "applicant": "555959863872716813",
-    "recruit": "398547748900831234"
+    "recruit": "398547748900831234",
+    "inactive": "632764860056207411"
   },
   "discordChannels": {
     "applicantsGeneral": "605298193990811669",
