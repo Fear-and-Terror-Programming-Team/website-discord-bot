@@ -394,16 +394,59 @@ const startWebServer = client => {
     });
 
     // Gives the applicants recruit tags, removes
-    server.post('/activity-check/finalize', (req, res) => {
-        const toBeRemovedIdsRaw = req.body.toBeRemovedIds;
+    server.post('/activity-check/assign-warning-role', (req, res) => {
+        const userIdsRaw = req.body.userIds;
 
-        if (!toBeRemovedIdsRaw) {
+        if (!userIdsRaw) {
             return res.status(400).send({
                 error: true,
-                message: 'toBeRemovedIds must be supplied',
+                message: 'userIds must be supplied',
             });
         }
-        const toBeRemovedIds = new Set(toBeRemovedIdsRaw
+        const userIds = new Set(userIdsRaw
+            .replace('"', '')
+            .replace('[', '')
+            .replace(']', '')
+            .replace(' ', '')
+            .split(','));
+
+        const guild = client.guilds.find(g => g.id === config.guildId);
+
+        if (!guild) {
+            return res.status(500).send({
+                error: true,
+                message: 'Guild not found',
+            });
+        }
+
+        const inactivityWarningRole = guild.roles.find(r => r.id === config.discordRoles["inactivity-warning"]);
+
+        userIds.forEach((userId) => {
+            guild.fetchMember(userId)
+            .then(member => {
+                console.log(`${member.displayName} got ${inactivityWarningRole.name}`);
+                return;
+                // TODO: arm
+                member.addRole(inactivityWarningRole).catch(console.error);
+            }).catch(err => {
+                console.error(err);
+                console.log(`Can't get user with ID ${userId}`)
+            });
+        });
+        res.status(200).send();
+    });
+
+    // Gives the applicants recruit tags, removes
+    server.post('/activity-check/strip-roles', (req, res) => {
+        const userIdsRaw = req.body.userIds;
+
+        if (!userIdsRaw) {
+            return res.status(400).send({
+                error: true,
+                message: 'userIds must be supplied',
+            });
+        }
+        const userIds = new Set(userIdsRaw
             .replace('"', '')
             .replace('[', '')
             .replace(']', '')
@@ -421,11 +464,33 @@ const startWebServer = client => {
 
         const inactiveRole = guild.roles.find(r => r.id === config.discordRoles.inactive);
 
-        toBeRemovedIds.forEach((userId) => {
+        userIds.forEach((userId) => {
             guild.fetchMember(userId)
                 .then(member => {
-                    console.log(`${member.displayName} got ${inactiveRole.name}`);
-                    // member.addRole(inactiveRole).catch(console.error); TODO: arm
+                    console.log(`${member.displayName} was stripped of their roles`);
+                    return;
+                    // TODO: arm
+                    member.removeRoles(member.roles).then(() => {
+                        member.addRole(inactiveRole).then(() => {
+                            let name = member.displayName;
+                            name = name.replace(new RegExp("^\\[FaTr?\\] ?"), "");
+                            member.setNickname(name)
+                            .then(() => {
+                                console.log(`${member.displayName} was stripped of their roles`);
+
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                console.error(`Could not rename ${member.displayName}`)
+                            });
+                        }).catch(err => {
+                            console.error(err);
+                            console.error(`Could not assign inactive role to ${member.displayName}`);
+                        });
+                    }).catch(err => {
+                        console.error(err);
+                        console.error(`Could not strip roles of ${member.displayName}`)
+                    });
                 });
         });
         res.status(200).send();
