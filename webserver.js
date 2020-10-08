@@ -425,7 +425,6 @@ const startWebServer = client => {
             guild.fetchMember(userId)
             .then(member => {
                 console.log(`${member.displayName} got ${inactivityWarningRole.name}`);
-                return;
                 // TODO: arm
                 member.addRole(inactivityWarningRole).catch(console.error);
             }).catch(err => {
@@ -468,8 +467,6 @@ const startWebServer = client => {
             guild.fetchMember(userId)
                 .then(member => {
                     console.log(`${member.displayName} was stripped of their roles`);
-                    return;
-                    // TODO: arm
                     member.removeRoles(member.roles).then(() => {
                         member.addRole(inactiveRole).then(() => {
                             let name = member.displayName;
@@ -477,7 +474,28 @@ const startWebServer = client => {
                             member.setNickname(name)
                             .then(() => {
                                 console.log(`${member.displayName} was stripped of their roles`);
-
+                                member.createDM().then(channel => {
+                                    channel.send(
+                                        // TODO: extract string
+                                        "Hello, You are being contacted by the Fear and Terror Personnel Team. \n" +
+                                        "\n" +
+                                        "> We regret to inform you that you will be removed as an official Fear and Terror Member. Because you did not meet the 1 hour of voice activity per 2 week period, we have found you to be inactive within our clan. \n" +
+                                        "\n" +
+                                        " ***You will not be removed from the Fear and Terror Discord***, only things that will be removed is your **`Rank, Roles, Whitelists, and FaT Tag.`**\n" +
+                                        "\n" +
+                                        "> **If you feel you have been removed wrongly because you are on a leaving-notice please feel free to ping @FaT- Personnel in help-desk or if you have an extreme circumstance that you believe should make you exempt please DM Kilrim or the Personnel Manager.**\n" +
+                                        "\n" +
+                                        "Fear and Terror wants Active members, with an Active playerbase. \n" +
+                                        "If you wish to rejoin Fear and Terror, **you will need to reapply in #inactive-rejoin-the-group and follow the directions in that channel.** If you have any questions, comments, or concerns, please go to Help-Desk under Staff Contact and tag @FaT-Personnel and or @Kilrim.\n" +
+                                        "\n" +
+                                        "We apologize if this comes as an inconvenience,\n" +
+                                        "Fear and Terror Personnel Team/Kilrim"
+                                    ).then(() => {
+                                        console.log(`${member.displayName} was notified of their removal`);
+                                    }).catch(err => {
+                                        console.log(`${member.displayName} has DMs blocked`);
+                                    })
+                                })
                             })
                             .catch(err => {
                                 console.error(err);
