@@ -3,7 +3,7 @@ const server = express();
 const port = 4500;
 const {UserVoiceState, logVoiceChannelActivity} = require('./events/trackVoiceActivity');
 const io = require('@pm2/io');
-const {RichEmbed} = require('discord.js');
+const {MessageEmbed} = require("discord.js");
 
 
 const Applications = require('./models/Applications');
@@ -42,16 +42,18 @@ const startWebServer = client => {
 
         const id = req.query.id;
 
-        const guild = client.guilds.find(g => g.id === config.guildId);
-        const channel = guild.channels.find(c => c.id === config.discordChannels.votingChannel);
+        const guild = client.guilds.cache.find(g => g.id === config.guildId);
+        const channel = guild.channels.cache.find(c => c.id === config.discordChannels.votingChannel);
 
         try {
-            channel.fetchMessage(id)
+            channel.messages.fetch(id)
                 .then(msg => {
-                    msg.delete();
-                    return res.status(200).send({
-                        complete: true,
-                    });
+                    msg.delete()
+                        .then(() => {
+                            return res.status(200).send({
+                                complete: true,
+                            });
+                        });
                 })
                 .catch(err => {
                     return res.status(200).send({
@@ -68,10 +70,10 @@ const startWebServer = client => {
 
     // A new application is ready for voting
     server.get('/application', (req, res) => {
-        const uid = req.query.uid;
-        const id = req.query.id;
+        const uid = req.query.userId;
+        const userId = req.query.userId;
 
-        console.log(`GOT APPLICATION: ${id} -- ${uid}`);
+        console.log(`GOT APPLICATION: ${userId} -- ${uid}`);
 
         if (!uid) {
             return res.status(500).send({
@@ -80,11 +82,11 @@ const startWebServer = client => {
             });
         }
 
-        const guild = client.guilds.find(g => g.id === config.guildId);
-        const channel = guild.channels.find(c => c.id === config.discordChannels.votingChannel); // application-voting-test
+        const guild = client.guilds.cache.find(g => g.id === config.guildId);
+        const channel = guild.channels.cache.find(c => c.id === config.discordChannels.votingChannel); // application-voting-test
 
         if (channel) {
-            return channel.send(`<@&${config.discordRoles.ambassador}> \n A new application has been posted by <@${uid}>. Please place your votes!\n http://${config.urls.personnel}/applications/${id}`)
+            return channel.send(`<@&${config.discordRoles.ambassador}> \n A new application has been posted by <@${uid}>. Please place your votes!\n http://${config.urls.personnel}/applications/${userId}`)
                 .then(message => {
 
                     // Update the application w/ the message id so we can delete it later
@@ -92,7 +94,7 @@ const startWebServer = client => {
                         votemessage: message.id,
                     }, {
                         where: {
-                            id,
+                            userId,
                         },
                     })
                         .then(result => {
@@ -126,7 +128,7 @@ const startWebServer = client => {
 
     // A new applicant passed voting
     server.get('/applicant/welcome', (req, res) => {
-        const uid = req.query.uid;
+        const uid = req.query.userId;
 
         if (!uid) {
             return res.status(500).send({
@@ -135,14 +137,14 @@ const startWebServer = client => {
             });
         }
 
-        const guild = client.guilds.find(g => g.id === config.guildId);
-        const channel = guild.channels.find(c => c.id === config.discordChannels.applicantsGeneral);
-        const role = guild.roles.find(r => r.id === config.discordRoles.applicant);
+        const guild = client.guilds.cache.find(g => g.id === config.guildId);
+        const channel = guild.channels.cache.find(c => c.id === config.discordChannels.applicantsGeneral);
+        const role = guild.roles.cache.find(r => r.id === config.discordRoles.applicant);
 
-        guild.fetchMember(uid)
+        guild.members.fetch(uid)
             .then(user => {
                 if (user && role && channel) {
-                    user.addRole(role).catch(console.error);
+                    user.roles.add(role).catch(console.error);
 
                     channel.send(`<@${uid}> your application has been APPROVED! Please refer to the <#${config.discordChannels.applicantInformation}> channel on how to proceed on becoming a member of Fear and Terror!`);
 
@@ -173,7 +175,7 @@ const startWebServer = client => {
     });
 
     server.get('/applicant/completed', (req, res) => {
-        const uid = req.query.uid;
+        const uid = req.query.userId;
         const steamId = req.query.steamId;
         const military = req.query.military;
         const tz = req.query.tz;
@@ -186,7 +188,7 @@ const startWebServer = client => {
             });
         }
 
-        const guild = client.guilds.find(g => g.id === config.guildId);
+        const guild = client.guilds.cache.find(g => g.id === config.guildId);
 
         if (!guild) {
             return res.status(500).send({
@@ -195,12 +197,12 @@ const startWebServer = client => {
             });
         }
 
-        const records = guild.channels.find(c => c.id === config.discordChannels.fatRecords); // FaT-Records Channel
+        const records = guild.channels.cache.find(c => c.id === config.discordChannels.fatRecords); // FaT-Records Channel
 
         if (records) {
-            guild.fetchMember(ambassador)
+            guild.members.fetch(ambassador)
                 .then(ambassador => {
-                    const embed = new RichEmbed()
+                    const embed = new MessageEmbed()
                         .setAuthor(ambassador.nickname || ambassador.username)
                         .setImage(ambassador.avatarURL)
                         .addField('Recruit', `<@${uid}>`, false)
@@ -227,7 +229,7 @@ const startWebServer = client => {
 
     // Gives the applicants recruit tags, removes
     server.get('/applicant/accepted', (req, res) => {
-        const uid = req.query.uid;
+        const uid = req.query.userId;
 
         if (!uid) {
             return res.status(500).send({
@@ -236,7 +238,7 @@ const startWebServer = client => {
             });
         }
 
-        const guild = client.guilds.find(g => g.id === config.guildId);
+        const guild = client.guilds.cache.find(g => g.id === config.guildId);
 
         if (!guild) {
             return res.status(500).send({
@@ -245,14 +247,14 @@ const startWebServer = client => {
             });
         }
 
-        const applicant = guild.roles.find(r => r.id === config.discordRoles.applicant);
-        const recruit = guild.roles.find(r => r.id === config.discordRoles.recruit);
+        const applicant = guild.roles.cache.find(r => r.id === config.discordRoles.applicant);
+        const recruit = guild.roles.cache.find(r => r.id === config.discordRoles.recruit);
 
-        guild.fetchMember(uid)
+        guild.members.fetch(uid)
             .then(user => {
                 if (user && applicant && recruit) {
-                    user.removeRole(applicant).catch(console.error);
-                    user.addRole(recruit).catch(console.error);
+                    user.roles.remove(applicant).catch(console.error);
+                    user.roles.add(recruit).catch(console.error);
 
                     user.send(`Hey ${user.displayName}, welcome to Fear and Terror! Here's a link to Fear and Terrors Steam Group https://steamcommunity.com/groups/FearandTerror`)
                         .catch(console.error);
@@ -297,7 +299,7 @@ const startWebServer = client => {
     });
 
     server.get('/applicant/denied', (req, res) => {
-        const uid = req.query.uid;
+        const uid = req.query.userId;
 
         if (!uid) {
             return res.status(500).send({
@@ -306,7 +308,7 @@ const startWebServer = client => {
             });
         }
 
-        const guild = client.guilds.find(g => g.id === config.guildId);
+        const guild = client.guilds.cache.find(g => g.id === config.guildId);
 
         if (!guild) {
             return res.status(500).send({
@@ -315,7 +317,7 @@ const startWebServer = client => {
             });
         }
 
-        guild.fetchMember(uid)
+        guild.members.fetch(uid)
             .then(user => {
                 if (user) {
                     user.send(`Hey ${user.displayName}, after review by our Ambassador Team, your application has been denied. Please feel free to try again after a 2 week waiting period.`)
@@ -340,7 +342,7 @@ const startWebServer = client => {
 
     // Pings a recruit in the channel-signups for tags
     server.get('/applicant/channel-signup', (req, res) => {
-        const uid = req.query.uid;
+        const uid = req.query.userId;
 
         if (!uid) {
             return res.status(500).send({
@@ -349,7 +351,7 @@ const startWebServer = client => {
             });
         }
 
-        const guild = client.guilds.find(g => g.id === config.guildId);
+        const guild = client.guilds.cache.find(g => g.id === config.guildId);
 
         if (!guild) {
             return res.status(500).send({
@@ -358,12 +360,12 @@ const startWebServer = client => {
             });
         }
 
-        const channel = guild.channels.find(c => c.id === config.discordChannels.channelSignups);
+        const channel = guild.channels.cache.find(c => c.id === config.discordChannels.channelSignups);
 
         if (channel) {
             channel.send(`<@${uid}> Review this channel to signup for your main games and channels! This message will auto-delete in 10 seconds.`)
                 .then(message => {
-                    message.delete(10000);
+                    message.delete({ timeout: 10000 });
                 });
 
             return res.status(200).send({
@@ -410,7 +412,7 @@ const startWebServer = client => {
             .replace(' ', '')
             .split(','));
 
-        const guild = client.guilds.find(g => g.id === config.guildId);
+        const guild = client.guilds.cache.find(g => g.id === config.guildId);
 
         if (!guild) {
             return res.status(500).send({
@@ -419,14 +421,14 @@ const startWebServer = client => {
             });
         }
 
-        const inactivityWarningRole = guild.roles.find(r => r.id === config.discordRoles["inactivity-warning"]);
+        const inactivityWarningRole = guild.roles.cache.find(r => r.id === config.discordRoles["inactivity-warning"]);
 
         userIds.forEach((userId) => {
-            guild.fetchMember(userId)
+            guild.members.fetch(userId)
             .then(member => {
                 console.log(`${member.displayName} got ${inactivityWarningRole.name}`);
                 // TODO: arm
-                member.addRole(inactivityWarningRole).catch(console.error);
+                member.roles.add(inactivityWarningRole).catch(console.error);
             }).catch(err => {
                 console.error(err);
                 console.log(`Can't get user with ID ${userId}`)
@@ -452,7 +454,7 @@ const startWebServer = client => {
             .replace(' ', '')
             .split(','));
 
-        const guild = client.guilds.find(g => g.id === config.guildId);
+        const guild = client.guilds.cache.find(g => g.id === config.guildId);
 
         if (!guild) {
             return res.status(500).send({
@@ -461,14 +463,14 @@ const startWebServer = client => {
             });
         }
 
-        const inactiveRole = guild.roles.find(r => r.id === config.discordRoles.inactive);
+        const inactiveRole = guild.roles.cache.find(r => r.id === config.discordRoles.inactive);
 
         userIds.forEach((userId) => {
-            guild.fetchMember(userId)
+            guild.members.fetch(userId)
                 .then(member => {
                     console.log(`${member.displayName} was stripped of their roles`);
-                    member.removeRoles(member.roles).then(() => {
-                        member.addRole(inactiveRole).then(() => {
+                    member.roles.remove(member.roles.cache).then(() => {
+                        member.roles.add(inactiveRole).then(() => {
                             let name = member.displayName;
                             name = name.replace(new RegExp("^\\[FaTr?\\] ?"), "");
                             member.setNickname(name)

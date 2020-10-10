@@ -7,7 +7,7 @@ const guildBanAdd = (guild, member) => {
 
             if (entry) {
                 // this user was banned
-                guild.fetchMember(entry.executor.id)
+                guild.members.fetch(entry.executor.id)
                     .then(user => {
                         LogEvent(member.id, user.id, user.nickname || user.username, 'ban-user', {
                             reason: entry.reason,

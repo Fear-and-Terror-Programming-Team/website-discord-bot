@@ -1,8 +1,8 @@
 const LogEvent = require('../methods/LogEvent');
 
 const guildMemberUpdate = (oldMember, newMember) => {
-    const oldRoles = oldMember.roles.array();
-    const newRoles = newMember.roles.array();
+    const oldRoles = oldMember.roles.cache.array();
+    const newRoles = newMember.roles.cache.array();
 
     // Roles have changed
     if (oldRoles.length !== newRoles.length) {
@@ -14,7 +14,7 @@ const guildMemberUpdate = (oldMember, newMember) => {
                     const target = entry.target.id;
                     const caller = entry.executor.id;
 
-                    newMember.guild.fetchMember(caller)
+                    newMember.guild.members.fetch(caller)
                         .then(user => {
                             entry.changes.forEach(change => {
                                 if (change.key === '$remove') {

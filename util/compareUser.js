@@ -8,7 +8,7 @@ const compareUserForUpdate = (oldMember, newMember, fromDB = false) => {
     if (fromDB) {
         oldRoles = oldMember.roles;
     } else {
-        oldMember.roles.forEach(role => {
+        oldMember.roles.cache.forEach(role => {
             oldRoles.push(role.id);
         });
         oldRoles = JSON.stringify(oldRoles);
@@ -16,7 +16,7 @@ const compareUserForUpdate = (oldMember, newMember, fromDB = false) => {
 
     // New member roles
     let newRoles = [];
-    newMember.roles.forEach(role => {
+    newMember.roles.cache.forEach(role => {
         newRoles.push(role.id);
     });
     newRoles = JSON.stringify(newRoles);

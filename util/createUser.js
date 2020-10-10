@@ -12,7 +12,7 @@ const createUser = member => {
 
     // Build the roles array here
     let roles = [];
-    member.roles.forEach(role => {
+    member.roles.cache.forEach(role => {
         roles.push(role.id);
     });
     roles = JSON.stringify(roles);

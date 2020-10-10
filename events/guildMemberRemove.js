@@ -8,7 +8,7 @@ const guildMemberRemove = (member) => {
             if (entry) {
                 if (member.id === entry.target.id) {
                     // this user was kicked
-                    member.guild.fetchMember(entry.executor.id)
+                    member.guild.members.fetch(entry.executor.id)
                         .then(user => {
                             LogEvent(member.id, user.id, user.nickname || user.username, 'kick-user', {
                                 reason: entry.reason,

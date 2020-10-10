@@ -20,6 +20,7 @@ const moment = require('moment');
 const {guildMemberUpdate} = require('./events/guildMemberUpdate');
 const {guildMemberRemove} = require('./events/guildMemberRemove');
 const {guildBanAdd} = require('./events/guildBanAdd');
+const {Intents} = require('discord.js')
 
 // Config
 const config = require('./config.json');
@@ -29,6 +30,9 @@ const client = new CommandoClient({
     commandPrefix: config.discordBot.commandPrefix,
     unknownCommandResponse: false,
     disableEveryone: true,
+    ws: {
+        intents: Intents.ALL,
+    },
 });
 
 // Log to console only for now
@@ -46,36 +50,38 @@ client.on('error', winston.error)
             // Go through all our guilds, create new members for people we've missed while offline...
             console.log('Starting to sync all users...');
 
-            let guild = client.guilds.find(g => g.id === config.guildId);
-            if (guild === undefined) {
-                console.warn(`Configured Discord guild (ID ${config.guildId} not found. `
-                    `Skipping synchronization. `
-                    `Has the bot not been added yet?`)
-                return;
-            }
+            client.guilds.fetch(config.guildId).then(g => {
+                let guild = g;
+                if (guild === undefined) {
+                    console.warn(`Configured Discord guild (ID ${config.guildId} not found. `
+                        `Skipping synchronization. `
+                        `Has the bot not been added yet?`)
+                    return;
+                }
 
 
-            console.log(`Starting synchronization of guild ${guild.name} with ${guild.memberCount} members.`)
-            guild.members.forEach(createUser);
+                console.log(`Starting synchronization of guild ${guild.name} with ${guild.memberCount} members.`)
+                guild.members.cache.forEach(createUser);
 
-            console.log(`Synchronized users.`);
+                console.log(`Synchronized users.`);
 
-            setTimeout(() => {
-                guild.roles.forEach(createRole);
-                console.log(`Synchronized roles.`);
+                setTimeout(() => {
+                    guild.roles.cache.forEach(createRole);
+                    console.log(`Synchronized roles.`);
 
-                guild.channels.forEach(channel => {
-                    if (channel.type === 'text') {
-                        channel.fetchMessages({limit: 2})
-                            .then(() => updateChannel(channel, true))
-                            .catch(() => updateChannel(channel, false));
-                    } else {
-                        updateChannel(channel);
-                    }
-                });
-                console.log(`Synchronized channels.`);
-                console.log(`Synchronization complete!`);
-            }, 0);
+                    guild.channels.cache.array().forEach(channel => {
+                        if (channel.type === 'text') {
+                            channel.messages.fetch({limit: 2}, false, true)
+                                .then(() => updateChannel(channel, true))
+                                .catch(() => updateChannel(channel, false));
+                        } else {
+                            updateChannel(channel);
+                        }
+                    });
+                    console.log(`Synchronized channels.`);
+                    console.log(`Synchronization complete!`);
+                }, 0);
+            });
 
         }, 0);
     })
@@ -136,8 +142,8 @@ client.on('error', winston.error)
     .on('guildCreate', guild => {
         winston.info('[TODO]: Add settings creation here for guilds');
 
-        guild.members.forEach(member => {
-            guild.members.forEach(member => {
+        guild.members.cache.forEach(member => {
+            guild.members.cache.forEach(member => {
                 createUser(member);
             });
         });
@@ -185,7 +191,7 @@ client.on('roleDelete', role => {
 });
 client.on('channelCreate', channel => {
     if (channel.type == 'text') {
-        channel.fetchMessages({limit: 2})
+        channel.messages.fetch({limit: 2}, false, true)
             .then(() => updateChannel(channel, true))
             .catch(() => updateChannel(channel, false));
     } else {
@@ -194,7 +200,7 @@ client.on('channelCreate', channel => {
 });
 client.on('channelUpdate', (old, channel) => {
     if (channel.type == 'text') {
-        channel.fetchMessages({limit: 2})
+        channel.messages.fetch({limit: 2}, false, true)
             .then(() => updateChannel(channel, true))
             .catch(() => updateChannel(channel, false));
     } else {
