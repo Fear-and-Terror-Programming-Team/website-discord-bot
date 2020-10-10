@@ -28,14 +28,16 @@ const logVoiceChannelActivity = (userId, time, channel, guild = config.guildId) 
 }
 
 const trackVoiceActivity = (oldMember, newMember) => {
-    let newUserChannel = newMember.voiceChannel;
-    let oldUserChannel = oldMember.voiceChannel;
+    let newUserChannel = newMember.channel;
+    let oldUserChannel = oldMember.channel;
 
+
+    console.log(`${newMember.member.user.username}: ${oldUserChannel} -> ${newUserChannel}`);
     // Leaving a channel
-    if (oldUserChannel !== undefined) {
+    if (oldUserChannel !== null) {
 
         // Both channel objects are set, check to see if they're going to a different channel
-        if (newUserChannel !== undefined) {
+        if (newUserChannel !== null) {
 
             // Channel is the same, abort
             if (oldUserChannel.id === newUserChannel.id) {
@@ -68,6 +70,8 @@ const trackVoiceActivity = (oldMember, newMember) => {
             if (UserVoiceState[newMember.id]) {
                 const session = UserVoiceState[newMember.id];
 
+                console.log("COMMIT");
+
                 logVoiceChannelActivity(newMember.id, ((Date.now() / 1000) - session.joinTime), oldUserChannel, newMember.guild.id);
 
                 delete UserVoiceState[newMember.id];
@@ -77,7 +81,7 @@ const trackVoiceActivity = (oldMember, newMember) => {
         }
     } else {
         // User joined a channel from nowhere
-        if (newUserChannel !== undefined) {
+        if (newUserChannel !== null) {
             UserVoiceState[newMember.id] = {
                 channel: newUserChannel.id,
                 joinTime: (Date.now() / 1000),
