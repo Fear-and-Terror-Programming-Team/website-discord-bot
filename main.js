@@ -31,7 +31,7 @@ const client = new CommandoClient({
     unknownCommandResponse: false,
     disableEveryone: true,
     ws: {
-        intents: Intents.ALL,
+        intents: new Intents(Intents.ALL),
     },
 });
 
